@@ -1,0 +1,2510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Affiliate Hub — Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--navy:#0F1923;--navy-mid:#1A2733;--navy-light:#243342;--navy-border:rgba(255,255,255,.07);--navy-border-mid:rgba(255,255,255,.12);--text-primary:#F0EDE8;--text-secondary:#8B9BA8;--text-tertiary:#546370;--green:#2DD4A4;--green-dim:rgba(45,212,164,.12);--green-text:#1EB888;--amber:#F5A623;--amber-dim:rgba(245,166,35,.12);--amber-text:#D4901E;--red:#F05252;--red-dim:rgba(240,82,82,.12);--red-text:#D44444;--blue:#4F9CF9;--blue-dim:rgba(79,156,249,.12);--blue-text:#3A86E8;--radius:10px;--radius-sm:6px;--pace-red:#F05252;--pace-red-text:#D44444;--pace-orange:#F97316;--pace-orange-text:#C55D10;--pace-yellow:#EAB308;--pace-yellow-text:#B8940A;--pace-green:#2DD4A4;--pace-green-text:#1EB888;--pace-blue:#4F9CF9;--pace-blue-text:#2870D4;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text-primary);font-size:13px;overflow:hidden;}
+.app{display:flex;height:100vh;}
+.sidebar{width:220px;background:var(--navy-mid);border-right:1px solid var(--navy-border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sb-logo{padding:22px 20px 18px;border-bottom:1px solid var(--navy-border);}
+.sb-eyebrow{font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:4px;}
+.sb-brand{font-family:'Instrument Serif',serif;font-size:18px;color:var(--text-primary);}
+.sb-brand em{color:var(--green);font-style:italic;}
+.sb-section{padding:18px 20px 6px;font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary);}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 20px;font-size:12.5px;color:var(--text-secondary);cursor:pointer;transition:all .15s;border-left:2px solid transparent;user-select:none;}
+.sb-item:hover{background:rgba(255,255,255,.04);color:var(--text-primary);}
+.sb-item.active{background:rgba(45,212,164,.06);color:var(--text-primary);border-left-color:var(--green);font-weight:500;}
+.sb-icon{width:14px;height:14px;opacity:.6;flex-shrink:0;}
+.sb-item.active .sb-icon{opacity:1;}
+.sb-badge{margin-left:auto;background:var(--red-dim);color:var(--red-text);font-size:9px;font-weight:600;padding:1px 6px;border-radius:10px;}
+.sb-badge.a{background:var(--amber-dim);color:var(--amber-text);}
+.sb-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--navy-border);display:flex;align-items:center;gap:10px;}
+.sb-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2DD4A4,#4F9CF9);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--navy);flex-shrink:0;}
+.sb-name{font-size:12px;font-weight:500;color:var(--text-primary);}
+.sb-role{font-size:10px;color:var(--text-tertiary);}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:var(--navy-mid);border-bottom:1px solid var(--navy-border);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.tb-title{font-family:'Instrument Serif',serif;font-size:20px;color:var(--text-primary);}
+.tb-sub{font-size:11px;color:var(--text-tertiary);}
+.tb-right{display:flex;align-items:center;gap:8px;}
+.period-tabs{display:flex;background:var(--navy);border-radius:var(--radius-sm);padding:3px;border:1px solid var(--navy-border);}
+.pt-btn{padding:5px 14px;border-radius:4px;font-size:11px;color:var(--text-secondary);cursor:pointer;transition:all .15s;user-select:none;}
+.pt-btn:hover{color:var(--text-primary);}
+.pt-btn.active{background:var(--navy-light);color:var(--text-primary);font-weight:500;}
+.alert-chip{background:var(--red-dim);color:var(--red-text);border:1px solid rgba(240,82,82,.2);font-size:10px;font-weight:500;padding:5px 10px;border-radius:var(--radius-sm);display:flex;align-items:center;gap:5px;}
+.alert-chip::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;animation:pulse 2s infinite;}
+.warn-chip{background:var(--amber-dim);color:var(--amber-text);border:1px solid rgba(245,166,35,.2);font-size:10px;font-weight:500;padding:5px 10px;border-radius:var(--radius-sm);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.import-btn{background:var(--green-dim);color:var(--green-text);border:1px solid rgba(45,212,164,0.25);font-size:11px;font-weight:500;padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.import-btn:hover{background:rgba(45,212,164,0.2);color:var(--green);}
+.fresh-chip{font-size:10px;color:var(--text-tertiary);padding:4px 8px;border:1px solid var(--navy-border);border-radius:var(--radius-sm);}
+/* Import modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;display:flex;align-items:center;justify-content:center;}
+.modal{background:var(--navy-mid);border:1px solid var(--navy-border-mid);border-radius:14px;width:640px;max-height:80vh;overflow-y:auto;padding:28px;}
+.modal-title{font-family:'Instrument Serif',serif;font-size:20px;margin-bottom:4px;}
+.modal-sub{font-size:11px;color:var(--text-tertiary);margin-bottom:22px;}
+.import-tabs{display:flex;gap:6px;margin-bottom:20px;border-bottom:1px solid var(--navy-border);padding-bottom:14px;}
+.itab{padding:6px 14px;border-radius:var(--radius-sm);font-size:11px;font-weight:500;cursor:pointer;color:var(--text-secondary);transition:all .15s;}
+.itab:hover{color:var(--text-primary);}
+.itab.active{background:var(--green-dim);color:var(--green-text);border:1px solid rgba(45,212,164,.2);}
+.import-pane{display:none;}.import-pane.active{display:block;}
+.drop-zone{border:1.5px dashed var(--navy-border-mid);border-radius:var(--radius);padding:28px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px;}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--green);background:var(--green-dim);}
+.dz-icon{font-size:24px;margin-bottom:8px;}
+.dz-label{font-size:12px;color:var(--text-secondary);margin-bottom:4px;}
+.dz-sub{font-size:10px;color:var(--text-tertiary);}
+.field-group{margin-bottom:14px;}
+.field-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:5px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.field-row.three{grid-template-columns:1fr 1fr 1fr;}
+.fi{background:var(--navy);border:1px solid var(--navy-border);border-radius:var(--radius-sm);padding:8px 10px;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:12px;width:100%;}
+.fi:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 2px rgba(45,212,164,.1);}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--navy-border);}
+.btn-sec{padding:8px 16px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;background:transparent;color:var(--text-secondary);border:1px solid var(--navy-border);font-family:'DM Sans',sans-serif;}
+.btn-pri{padding:8px 16px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;background:var(--green);color:var(--navy);border:none;font-family:'DM Sans',sans-serif;font-weight:600;}
+.btn-pri:hover{background:var(--green-text);}
+.parse-preview{margin-top:12px;background:var(--navy);border:1px solid var(--navy-border);border-radius:var(--radius-sm);padding:12px;font-size:11px;color:var(--text-secondary);max-height:160px;overflow-y:auto;}
+.parse-preview code{font-family:'DM Mono',monospace;font-size:10px;color:var(--green-text);}
+.parse-preview .err{color:var(--red-text);}
+.col-map{margin-top:10px;}
+.col-map-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px;}
+.col-map-from{min-width:140px;color:var(--text-secondary);font-family:'DM Mono',monospace;font-size:10px;}
+.arrow{color:var(--text-tertiary);}
+.fi-sm{background:var(--navy);border:1px solid var(--navy-border);border-radius:4px;padding:4px 8px;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:11px;}
+.manual-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.manual-group{background:var(--navy-light);border-radius:var(--radius-sm);padding:12px;}
+.manual-group-lbl{font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--text-tertiary);margin-bottom:8px;}
+.section-divider{border:none;border-top:1px solid var(--navy-border);margin:16px 0;}
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--navy-border);font-size:11px;}
+.history-item:last-child{border-bottom:none;}
+.hi-source{color:var(--text-primary);font-weight:500;}
+.hi-meta{color:var(--text-tertiary);}
+.hi-date{color:var(--text-secondary);font-family:'DM Mono',monospace;font-size:10px;}
+.status-msg{font-size:11px;padding:8px 12px;border-radius:var(--radius-sm);margin-top:10px;}
+
+.pace-bar{display:flex;align-items:center;gap:14px;background:var(--navy-light);border:1px solid var(--navy-border-mid);border-radius:var(--radius-sm);padding:7px 16px;white-space:nowrap;overflow:hidden;}
+.pace-bar.warn{border-color:rgba(245,166,35,.35);background:rgba(245,166,35,.05);}
+.pace-bar.alert{border-color:rgba(240,82,82,.35);background:rgba(240,82,82,.05);}
+.pace-bar.ok{border-color:rgba(45,212,164,.35);background:rgba(45,212,164,.05);}
+.pace-icon{font-size:13px;flex-shrink:0;}
+.pace-msg{font-size:11px;color:var(--text-primary);white-space:nowrap;flex:1;overflow:hidden;text-overflow:ellipsis;}
+.pace-msg strong{font-weight:600;}
+.pace-msg .dim{color:var(--text-tertiary);font-size:10px;}
+.pace-pills{display:flex;gap:6px;flex-shrink:0;align-items:center;}
+.pace-pill{font-size:10px;font-weight:500;padding:2px 9px;border-radius:4px;white-space:nowrap;}
+.pace-pill.green{background:var(--green-dim);color:var(--green-text);}
+.pace-pill.amber{background:var(--amber-dim);color:var(--amber-text);}
+.pace-pill.red{background:var(--red-dim);color:var(--red-text);}
+.status-msg.ok{background:var(--green-dim);color:var(--green-text);}
+.status-msg.err{background:var(--red-dim);color:var(--red-text);}
+.status-msg.warn{background:var(--amber-dim);color:var(--amber-text);}
+.fmt-guide{background:var(--navy);border:1px solid var(--navy-border-mid);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:16px;}
+.fmt-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:10px;}
+.fmt-row{display:flex;gap:12px;margin-bottom:8px;align-items:flex-start;}
+.fmt-src{font-size:11px;font-weight:600;color:var(--green-text);min-width:72px;flex-shrink:0;font-family:'DM Mono',monospace;padding-top:1px;}
+.fmt-how{font-size:11px;color:var(--text-secondary);line-height:1.5;}
+.fmt-how strong{color:var(--text-primary);font-weight:500;}
+.fmt-note{font-size:10px;color:var(--text-tertiary);margin-top:10px;padding-top:10px;border-top:1px solid var(--navy-border);line-height:1.5;}
+.content{flex:1;overflow-y:auto;padding:22px 28px 40px;display:flex;flex-direction:column;gap:20px;}
+.content::-webkit-scrollbar{width:4px;}
+.content::-webkit-scrollbar-thumb{background:var(--navy-border-mid);border-radius:2px;}
+.page{display:none;flex-direction:column;gap:20px;}
+.page.active{display:flex;}
+.sec-label{font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.src-badge{font-size:8px;padding:2px 6px;border:1px solid var(--navy-border-mid);border-radius:4px;color:var(--text-tertiary);}
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+
+.kpi-row-2{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:10px;}
+.kpi-card{background:var(--navy-mid);border:1px solid var(--navy-border);border-radius:var(--radius);padding:14px 16px;transition:border-color .2s;}
+.kpi-card:hover{border-color:var(--navy-border-mid);}
+.kpi-label{font-size:11.5px;color:var(--text-tertiary);margin-bottom:6px;font-weight:400;}
+.kpi-value{font-size:26px;font-weight:300;color:var(--text-primary);line-height:1.1;letter-spacing:-.02em;font-family:'DM Mono',monospace;}
+.kpi-delta{font-size:11px;margin-top:6px;line-height:1.4;}
+.kpi-delta.up{color:var(--green-text)}.kpi-delta.dn{color:var(--red-text)}.kpi-delta.wa{color:var(--amber-text);}
+.kpi-bar{height:3px;background:var(--navy-light);border-radius:2px;margin-top:8px;}
+.kpi-fill{height:3px;border-radius:2px;transition:width .5s ease;}
+.panel{background:var(--navy-mid);border:1px solid var(--navy-border);border-radius:var(--radius);padding:18px 20px;}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.pt{font-size:12px;font-weight:500;color:var(--text-primary);}
+.pl{font-size:10px;color:var(--blue-text);cursor:pointer;}
+.pl:hover{text-decoration:underline;}
+.g3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;}
+.g3eq{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{text-align:left;font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);padding:0 0 8px;border-bottom:1px solid var(--navy-border);}
+.tbl td{padding:9px 0;border-bottom:1px solid var(--navy-border);vertical-align:middle;font-size:12px;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl .nr{text-align:right;font-family:'DM Mono',monospace;font-size:11px;}
+.sh{cursor:pointer;user-select:none;white-space:nowrap;}
+.sh:hover{color:var(--text-primary)!important;background:rgba(255,255,255,.03);}
+.sh.asc,.sh.desc{color:var(--green-text)!important;}
+.si{font-size:9px;opacity:.7;margin-left:2px;}
+.tableau-badge{display:inline-flex;align-items:center;gap:3px;font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(79,156,249,.12);color:var(--blue-text);margin-left:4px;vertical-align:middle;}
+.everflow-badge{display:inline-flex;align-items:center;gap:3px;font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(45,212,164,.1);color:var(--green-text);margin-left:4px;vertical-align:middle;}
+.merged-badge{font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(168,139,250,.12);color:#a78bfa;margin-left:4px;vertical-align:middle;}
+.tbl tr:hover td{background:rgba(255,255,255,.02);}
+.pname{font-weight:500;color:var(--text-primary);}
+.psub{font-size:10px;color:var(--text-tertiary);margin-top:1px;}
+.pill{display:inline-flex;align-items:center;font-size:9px;font-weight:500;padding:3px 8px;border-radius:4px;white-space:nowrap;}
+.pg{background:var(--green-dim);color:var(--green-text);}
+.pa{background:var(--amber-dim);color:var(--amber-text);}
+.pr{background:var(--red-dim);color:var(--red-text);}
+.pb{background:var(--blue-dim);color:var(--blue-text);}
+.pgy{background:rgba(255,255,255,.05);color:var(--text-secondary);}
+.spark{display:flex;align-items:flex-end;gap:2px;height:24px;}
+.sb{width:5px;border-radius:1px;flex-shrink:0;}
+.pi{margin-bottom:14px;}
+.pi:last-child{margin-bottom:0;}
+.pr2{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;}
+.pl2{color:var(--text-secondary);}
+.pv{font-family:'DM Mono',monospace;font-weight:500;}
+.pt2{height:5px;background:var(--navy-light);border-radius:3px;}
+.pf{height:5px;border-radius:3px;transition:width .5s ease;}
+.stat-row{display:flex;gap:18px;margin-top:14px;padding-top:12px;border-top:1px solid var(--navy-border);}
+.sv{font-family:'DM Mono',monospace;font-size:18px;font-weight:300;color:var(--text-primary);}
+.sl{font-size:10px;color:var(--text-tertiary);margin-top:2px;}
+.rsplit{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
+.rsb{background:var(--navy-light);border-radius:var(--radius-sm);padding:10px 12px;}
+.rsl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:5px;}
+.rsv{font-family:'DM Mono',monospace;font-size:16px;font-weight:300;color:var(--text-primary);}
+.rss{font-size:10px;color:var(--text-tertiary);margin-top:3px;}
+.pipe-board{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.pch{font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--text-tertiary);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.pcnt{background:var(--navy-light);color:var(--text-secondary);font-size:9px;padding:1px 6px;border-radius:8px;}
+.pc{background:var(--navy-light);border:1px solid var(--navy-border);border-radius:var(--radius-sm);padding:9px 11px;margin-bottom:6px;cursor:pointer;transition:border-color .15s;}
+.pc:hover{border-color:var(--navy-border-mid);}
+.pc.cg{border-left:2px solid var(--green);}
+.pc.ca{border-left:2px solid var(--amber);}
+.pc.cr{border-left:2px solid var(--red);}
+.pcn{font-size:11px;font-weight:500;color:var(--text-primary);margin-bottom:3px;}
+.pcm{font-size:10px;color:var(--text-tertiary);}
+.pcc{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;}
+.tk{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--navy-border);}
+.tk:last-child{border-bottom:none;}
+.td2{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.td2.r{background:var(--red)}.td2.a{background:var(--amber)}.td2.g{background:var(--green)}.td2.b{background:var(--blue)}.td2.gy{background:var(--text-tertiary);}
+.tid{font-size:10px;color:var(--text-tertiary);font-family:'DM Mono',monospace;min-width:62px;flex-shrink:0;}
+.tb2{flex:1;}
+.tt{font-size:11.5px;color:var(--text-primary);line-height:1.4;}
+.tm{font-size:10px;color:var(--text-tertiary);margin-top:2px;}
+.tdue{font-size:10px;color:var(--text-secondary);white-space:nowrap;}
+.okri{padding:10px 0;border-bottom:1px solid var(--navy-border);}
+.okri:last-child{border-bottom:none;}
+.okrt{font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px;}
+.okrk{font-size:11.5px;color:var(--text-primary);line-height:1.4;}
+.okrn{font-size:10px;color:var(--text-tertiary);margin-top:3px;}
+.okrb{height:3px;background:var(--navy-light);border-radius:2px;margin-top:7px;}
+.okrf{height:3px;border-radius:2px;}
+.chart-wrap{position:relative;width:100%;height:180px;}
+.leg{display:flex;gap:16px;margin-top:10px;}
+.legi{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-secondary);}
+.legsw{width:20px;height:2px;border-radius:1px;}
+.sc-card{background:var(--navy-mid);border:1px solid var(--navy-border);border-radius:var(--radius);padding:16px 18px;cursor:pointer;transition:border-color .2s;}
+.sc-card:hover{border-color:var(--navy-border-mid);}
+.sc-card.sel{border-color:var(--green);background:rgba(45,212,164,.04);}
+.scn{font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:2px;}
+.sct{font-size:10px;color:var(--text-tertiary);margin-bottom:10px;}
+.scm{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;}
+.scmb{background:var(--navy-light);border-radius:var(--radius-sm);padding:8px 10px;}
+.scmv{font-family:'DM Mono',monospace;font-size:14px;font-weight:300;color:var(--text-primary);}
+.scml{font-size:9px;color:var(--text-tertiary);margin-top:2px;}
+.comp-card{background:var(--navy-mid);border:1px solid var(--navy-border);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;}
+.comp-card:last-child{margin-bottom:0;}
+.comp-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.comp-title{font-size:13px;font-weight:500;color:var(--text-primary);}
+.comp-body{font-size:11px;color:var(--text-secondary);line-height:1.6;}
+.comp-ft{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--navy-border);}
+.npqr{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--navy-border);}
+.npqr:last-child{border-bottom:none;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--navy-border-mid);border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-eyebrow">Partnerships</div>
+    <div class="sb-brand">Affiliate <em>Hub</em></div>
+  </div>
+  <div class="sb-section">Performance</div>
+  <div class="sb-item active" data-page="command">
+    <svg class="sb-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="7" width="3" height="6" rx="1" fill="currentColor"/><rect x="5.5" y="4" width="3" height="9" rx="1" fill="currentColor"/><rect x="10" y="1" width="3" height="12" rx="1" fill="currentColor"/></svg>
+    Command center
+  </div>
+  <div class="sb-item" data-page="scorecards">
+    <svg class="sb-icon" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3l2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    Partner scorecards
+  </div>
+  <div class="sb-item" data-page="revenue">
+    <svg class="sb-icon" viewBox="0 0 14 14" fill="none"><path d="M2 11L6 7L9 10L12 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Revenue deep dive
+  </div>
+  <div class="sb-section">Biz Dev</div>
+  <div class="sb-item" data-page="pipeline">
+    <svg class="sb-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+    Pipeline <span class="sb-badge a">8</span>
+  </div>
+  <div class="sb-item" data-page="newpartners">
+    <svg class="sb-icon" viewBox="0 0 14 14" fill="none"><path d="M7 1L9 5H13L10 8L11 12L7 10L3 12L4 8L1 5H5L7 1Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+    New partner queue
+  </div>
+  <div class="sb-section">Operations</div>
+  <div class="sb-item" data-page="compliance">
+    <svg class="sb-icon" viewBox="0 0 14 14" fill="none"><path d="M7 2L7 7M7 10L7 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/></svg>
+    Compliance flags <span class="sb-badge">3</span>
+  </div>
+  <div class="sb-item" data-page="jira">
+    <svg class="sb-icon" viewBox="0 0 14 14" fill="none"><rect x="2" y="3" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 1V4M9 1V4M2 6H12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    Jira tickets <span class="sb-badge a">5</span>
+  </div>
+  <div class="sb-item" data-page="okrs">
+    <svg class="sb-icon" viewBox="0 0 14 14" fill="none"><path d="M2 4H12M2 7H9M2 10H11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    OKRs &amp; roadmap
+  </div>
+  <div class="sb-footer">
+    <div class="sb-av">RY</div>
+    <div><div class="sb-name">Ross Y.</div><div class="sb-role">Director, Affiliate</div></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title" id="pgTitle">Command center</div>
+      <div class="tb-sub" id="pgSub">March MTD · Mar 1–24, 2026</div>
+    </div>
+    <div class="tb-right">
+      <div class="period-tabs" id="periodTabs">
+        <div class="pt-btn" data-p="wtd">WTD</div>
+        <div class="pt-btn active" data-p="mtd">MTD</div>
+        <div class="pt-btn" data-p="ytd">YTD</div>
+      </div>
+      <div class="warn-chip" id="killChip">⚠ Momentum kill decision</div>
+      <div class="alert-chip" id="compChip">3 compliance flags</div>
+      <div id="freshChip" class="fresh-chip" style="display:none;"></div>
+      <button class="import-btn" onclick="try{openImport()}catch(e){document.getElementById('importModal').style.display='flex'}">⬆ Import data</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- PAGE: COMMAND CENTER -->
+    <div class="page active" id="page-command">
+      <div>
+        <div class="sec-label">Performance vs finance targets <span class="src-badge">Everflow</span><span class="src-badge">BI/Tableau</span><span class="src-badge">Finance</span></div>
+
+        <div class="kpi-row">
+          <div class="kpi-card"><div class="kpi-label">Spend</div><div class="kpi-value" id="v-spend">$164K</div><div class="kpi-delta wa" id="d-spend">63% of pace · $161,226 expected by day 21</div><div class="kpi-bar"><div class="kpi-fill" id="b-spend" style="width:91%;background:var(--pace-yellow);"></div></div></div>
+          <div class="kpi-card"><div class="kpi-label">Signups</div><div class="kpi-value" id="v-signups">882</div><div class="kpi-delta wa" id="d-signups">94% of pace · 893 expected by day 23</div><div class="kpi-bar"><div class="kpi-fill" id="b-signups" style="width:95%;background:var(--pace-yellow);"></div></div></div>
+          <div class="kpi-card"><div class="kpi-label">New Customers</div><div class="kpi-value" id="v-paids">369</div><div class="kpi-delta wa" id="d-paids">89% of pace · 398 expected by day 23</div><div class="kpi-bar"><div class="kpi-fill" id="b-paids" style="width:100%;background:var(--pace-green);"></div></div></div>
+          <div class="kpi-card"><div class="kpi-label">Signup CPA</div><div class="kpi-value" id="v-cpa">$186</div><div class="kpi-delta up" id="d-cpa">↑ $12 under target ($198) ✓</div><div class="kpi-bar"><div class="kpi-fill" id="b-cpa" style="width:90%;background:var(--green);"></div></div></div>
+          <div class="kpi-card"><div class="kpi-label">New Customer CPA</div><div class="kpi-value" id="v-pcpa">$445</div><div class="kpi-delta up" id="d-pcpa">↑ $3 under target ($443) ✓</div><div class="kpi-bar"><div class="kpi-fill" id="b-pcpa" style="width:97.9%;background:var(--green);"></div></div></div>
+          <div class="kpi-card"><div class="kpi-label">Customer CVR</div><div class="kpi-value" id="v-pr">41.8%</div><div class="kpi-delta up" id="d-pr">↓ 2.4pp vs plan (44.6%)</div><div class="kpi-bar"><div class="kpi-fill" id="b-pr" style="width:85%;background:var(--green);"></div></div></div>
+        </div>
+
+        <!-- Days remaining + pace alert — full-width bar below KPI strip -->
+        <div id="paceAlert" style="display:none;margin-top:10px;">
+          <div class="pace-bar">
+            <span class="pace-icon" id="paceIcon">⚡</span>
+            <span class="pace-msg" id="paceMsg"></span>
+            <div class="pace-pills" id="paceRight"></div>
+          </div>
+        </div>
+      </div>
+        <!-- ROW 2: Clicks, CVR, CPC, Revenue, Margin $, Margin % -->
+        <div class="sec-label" style="margin-top:14px;">Traffic & revenue <span class="src-badge">Everflow</span><span class="src-badge">LTR model</span></div>
+        <div class="kpi-row-2" id="kpi-row-2">
+          <div class="kpi-card"><div class="kpi-label">Clicks</div><div class="kpi-value" id="v-clicks">43,825</div><div class="kpi-delta wa" id="d-clicks">87% of pace · 50,485 expected by day 23</div><div class="kpi-bar"><div class="kpi-fill" id="b-clicks" style="width:87%;background:var(--amber);"></div></div></div><div class="kpi-card"><div class="kpi-label">Signup CVR</div><div class="kpi-value" id="v-cvr">1.91%</div><div class="kpi-delta up" id="d-cvr">↑ +0.14pp vs 1.77% target</div><div class="kpi-bar"><div class="kpi-fill" id="b-cvr" style="width:100%;background:var(--green);"></div></div></div><div class="kpi-card"><div class="kpi-label">CPC</div><div class="kpi-value" id="v-cpc">$3.55</div><div class="kpi-delta dn" id="d-cpc">↓ $0.05 over target ($3.5)</div><div class="kpi-bar"><div class="kpi-fill" id="b-cpc" style="width:85%;background:var(--amber);"></div></div></div><div class="kpi-card"><div class="kpi-label">Revenue (LTR)</div><div class="kpi-value" id="v-rev2">$208K</div><div class="kpi-delta up" id="d-rev2">LTR-based · 33.5% above spend</div><div class="kpi-bar"><div class="kpi-fill" id="b-rev2" style="width:85%;background:var(--green);"></div></div></div><div class="kpi-card"><div class="kpi-label">Margin $</div><div class="kpi-value" id="v-mgdollar">$52K</div><div class="kpi-delta up" id="d-mgdollar">+$52.2K · 33.5% margin</div><div class="kpi-bar"><div class="kpi-fill" id="b-mgdollar" style="width:75%;background:var(--green);"></div></div></div><div class="kpi-card"><div class="kpi-label">Margin %</div><div class="kpi-value" id="v-mgpct">33.5%</div><div class="kpi-delta up" id="d-mgpct">LTR-based · $52.2K on $156K spend</div><div class="kpi-bar"><div class="kpi-fill" id="b-mgpct" style="width:67%;background:var(--green);"></div></div></div>
+        </div>
+
+      <div class="g3">
+<div class="panel">
+          <div class="ph"><div class="pt" id="chartLbl">Weekly signups &amp; paids · Q1 trend</div><span class="src-badge">Everflow</span></div>
+          <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+          <div class="leg"><div class="legi"><div class="legsw" style="background:var(--blue);"></div>Signups</div><div class="legi"><div class="legsw" style="background:var(--green);"></div>New Customers</div><div class="legi"><div class="legsw" style="background:var(--red);"></div>Target</div></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">Monthly pacing</div><span class="src-badge">Finance</span></div>
+          <div class="pi"><div class="pr2"><span class="pl2">January</span><span class="pv" id="pv-jan" style="color:var(--amber-text);">1,101 · 99%</span></div><div class="pt2"><div class="pf" id="pf-jan" style="width:99%;background:var(--amber);"></div></div></div>
+          <div class="pi"><div class="pr2"><span class="pl2">February</span><span class="pv" id="pv-feb" style="color:var(--amber-text);">1,036 · 92%</span></div><div class="pt2"><div class="pf" id="pf-feb" style="width:92%;background:var(--amber);"></div></div></div>
+          <div class="pi"><div class="pr2"><span class="pl2">March <small style="color:var(--text-tertiary);">(vs 932 expected · day 24)</small></span><span class="pv" id="pv-mar" style="color:var(--amber-text);">882 · 95% of pace</span></div><div class="pt2"><div class="pf" id="pf-mar" style="width:95%;background:var(--amber);"></div></div></div>
+          <div style="font-size:9px;color:var(--text-tertiary);margin-bottom:10px;padding-top:6px;border-top:1px solid var(--navy-border);">Jan/Feb = actual vs plan · Mar = actual vs expected by day 21</div><div class="stat-row"><div><div class="sv" id="s-spend">$600K</div><div class="sl">Spend target</div></div><div><div class="sv" id="s-sig">3,320</div><div class="sl">Signup target</div></div></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">CPA vs targets</div><span class="src-badge">Finance</span></div>
+          <div class="pi"><div class="pr2"><span class="pl2">Conv. CPA</span><span class="pv" id="cpa-v" style="color:var(--green-text);">$188 · $10 under ✓</span></div><div class="pt2"><div class="pf" style="width:90%;background:var(--green);"></div></div><div style="font-size:9px;color:var(--text-tertiary);margin-top:3px;" id="cpa-n">Target ≤$198</div></div>
+          <div class="pi"><div class="pr2"><span class="pl2">New Customer CPA</span><span class="pv" style="color:var(--green-text);">$435 · $76 under ✓</span></div><div class="pt2"><div class="pf" style="width:85%;background:var(--green);"></div></div><div style="font-size:9px;color:var(--text-tertiary);margin-top:3px;">Target ≤$443</div></div>
+          <div class="pi"><div class="pr2"><span class="pl2">Top-3 concentration</span><span class="pv" style="color:var(--amber-text);">76% · target ≤65%</span></div><div class="pt2"><div class="pf" style="width:76%;background:var(--amber);"></div></div></div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--navy-border);">
+            <div class="sec-label" style="margin-bottom:8px;">Repair vs non-repair <span class="src-badge">Tableau</span></div>
+            <div class="rsplit"><div class="rsb"><div class="rsl">Primary</div><div class="rsv" id="r-rep">735</div><div class="rss">43.7% customer CVR</div></div><div class="rsb"><div class="rsl">Non-repair</div><div class="rsv" id="r-nonrep">1,418</div><div class="rss">33.2% customer CVR</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ph">
+          <div class="pt">Partner performance</div>
+          <div style="display:flex;gap:6px;align-items:center;"><span class="src-badge">Everflow</span><span class="src-badge">Tableau</span><span class="pl" onclick="navTo('scorecards')">All scorecards →</span></div>
+        </div>
+        <table class="tbl">
+          <thead><tr>
+            <th style="width:19%;">Partner</th>
+            <th class="nr sh" data-col="sp" onclick="sortPartners('sp')">Spend <span class="si" id="si-sp"></span></th>
+            <th class="nr sh" data-col="cl" onclick="sortPartners('cl')">Clicks <span class="si" id="si-cl"></span></th>
+            <th class="nr sh" data-col="sg" onclick="sortPartners('sg')">Signups <span class="si" id="si-sg"></span></th>
+            <th class="nr sh" data-col="cv" onclick="sortPartners('cv')">Signup CVR <span class="si" id="si-cv"></span></th>
+            <th class="nr sh" data-col="cp" onclick="sortPartners('cp')">CPA <span class="si" id="si-cp"></span></th>
+            <th class="nr sh" data-col="pr" onclick="sortPartners('pr')">Customer CVR <span class="si" id="si-pr"></span></th>
+            <th class="nr sh" data-col="pa" onclick="sortPartners('pa')">New Customers <span class="si" id="si-pa"></span></th>
+            <th class="nr sh" data-col="mgn" onclick="sortPartners('mgn')">Margin $ <span class="si" id="si-mgn"></span></th>
+            <th class="nr">Margin %</th>
+            <th>Status</th>
+            <th style="text-align:center;width:6%;">7d</th>
+          </tr></thead>
+          <tbody id="partnerTbody"></tbody>
+        </table>
+      </div>
+
+      <div class="g2">
+        <div class="panel">
+          <div class="ph"><div class="pt">This week · Week 12 priorities</div><span class="src-badge">Planner</span></div>
+          <div class="tk"><div class="td2 r"></div><div class="tb2"><div class="tt">Momentum Newsletters kill — 0.07% CVR, $3.1K spent, 0 paids, 60-day gate hit</div></div><div class="tdue" style="color:var(--red-text);">Today</div></div>
+          <div class="tk"><div class="td2 a"></div><div class="tb2"><div class="tt">Sterling Digital contract — follow up legal, 9-day hold (MA-2745)</div></div><div class="tdue">This week</div></div>
+          <div class="tk"><div class="td2 a"></div><div class="tb2"><div class="tt">AFF-412 creative due tomorrow — NovaStar LP refresh</div></div><div class="tdue">3/22</div></div>
+          <div class="tk"><div class="td2 b"></div><div class="tb2"><div class="tt">Q1 finance review prep — Everflow export + BI summary</div></div><div class="tdue">3/27</div></div>
+          <div class="tk"><div class="td2 gy"></div><div class="tb2"><div class="tt">Q2 OKR planning — tax refund campaign, new partner ≥15% target</div></div><div class="tdue">Q2 input</div></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">Q1 OKR health</div><span class="pl" onclick="navTo('okrs')">Full roadmap →</span></div>
+          <div class="okri"><div class="okrt" style="color:var(--green);">Activate · OKR 2.1</div><div class="okrk">Launch 5–6 net-new partners with full tracking &amp; compliance</div><div class="okrn">7 launched Q1 · on track</div><div class="okrb"><div class="okrf" style="width:100%;background:var(--green);"></div></div></div>
+          <div class="okri"><div class="okrt" style="color:var(--amber);">Diversify · OKR 1.1</div><div class="okrk">Reduce top-3 concentration from ~80% → ≤65%</div><div class="okrn">Currently 76% · Longtail growing</div><div class="okrb"><div class="okrf" style="width:55%;background:var(--amber);"></div></div></div>
+          <div class="okri"><div class="okrt" style="color:var(--blue);">Grow · OKR 2.1</div><div class="okrk">Increase signup CVR +5bp vs Oct '25 (1.4% → 1.45%)</div><div class="okrn">ClearPath + NovaStar LP tests live · measuring</div><div class="okrb"><div class="okrf" style="width:60%;background:var(--blue);"></div></div></div>
+          <div class="okri"><div class="okrt" style="color:var(--green);">Comply · OKR 4</div><div class="okrk">Q1 compliance review with no material violations</div><div class="okrn">3 open flags · all non-critical · audit in progress</div><div class="okrb"><div class="okrf" style="width:85%;background:var(--green);"></div></div></div>
+        </div>
+      </div>
+    </div><!-- /command -->
+
+    <!-- PAGE: SCORECARDS -->
+    <div class="page" id="page-scorecards">
+      <div class="sec-label">Partner scorecards — click any card to expand <span class="src-badge">Everflow</span></div>
+      <div class="g3eq" id="scorecardGrid"></div>
+      <div class="panel" id="scDetail" style="display:none;">
+        <div class="ph"><div class="pt" id="scDetailName">Detail</div><span class="pl" onclick="document.getElementById('scDetail').style.display='none'">Close ✕</span></div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;" id="scDetailMetrics"></div>
+        <div class="chart-wrap" style="margin-top:16px;"><canvas id="scChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- PAGE: REVENUE -->
+    <div class="page" id="page-revenue">
+      <div class="sec-label">Revenue &amp; margin <span class="src-badge">Everflow</span><span class="src-badge">BI</span></div>
+      <div class="g4">
+        <div class="kpi-card"><div class="kpi-label">Channel spend</div><div class="kpi-value" id="rv-spend">$587K</div><div class="kpi-delta wa">97.7% paced</div></div>
+        <div class="kpi-card"><div class="kpi-label">Total revenue (RPA)</div><div class="kpi-value" id="rv-rev">$814K</div><div class="kpi-delta up">↑ 14.2% YoY</div></div>
+        <div class="kpi-card"><div class="kpi-label">Total margin $</div><div class="kpi-value" id="rv-margin">$91K</div><div class="kpi-delta up">15.5% blended</div></div>
+        <div class="kpi-card"><div class="kpi-label">Blended margin %</div><div class="kpi-value" id="rv-pct">15.5%</div><div class="kpi-delta up">↑ vs 12.1% prior Q</div></div>
+      </div>
+      <div class="g2">
+        <div class="panel"><div class="ph"><div class="pt">Margin by partner</div><span class="src-badge">BI</span></div><div class="chart-wrap"><canvas id="marginChart"></canvas></div></div>
+        <div class="panel"><div class="ph"><div class="pt">Spend mix</div><span class="src-badge">Everflow</span></div><div class="chart-wrap"><canvas id="spendChart"></canvas></div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="pt">Revenue breakdown by partner</div></div>
+        <table class="tbl"><thead><tr><th style="width:22%;">Partner</th><th class="nr">Spend</th><th class="nr">Revenue</th><th class="nr">Profit</th><th class="nr">Margin %</th><th class="nr">CPA</th><th class="nr">Customer CVR</th><th>Health</th></tr></thead><tbody id="revTbody"></tbody></table>
+      </div>
+    </div>
+
+      <!-- GAP ANALYSIS — horizontal full-width panel -->
+      <div id="gapPanel" style="display:none;" class="panel">
+        <div class="ph">
+          <div class="pt">📊 Closing the gap — recommendations</div>
+          <span class="src-badge" style="margin-left:auto;">Everflow · Tableau · Mar 22</span>
+        </div>
+        <div id="gapContent"></div>
+      </div>
+
+
+    <!-- PAGE: PIPELINE -->
+    <div class="page" id="page-pipeline">
+      <div class="sec-label">Biz dev pipeline — 8 partners in flight <span class="src-badge">Jira</span></div>
+      <div class="panel">
+        <div class="pipe-board">
+          <div><div class="pch">Qualifying <span class="pcnt">2</span></div>
+            <div class="pc"><div class="pcn">BlueSky Finance</div><div class="pcm">Inbound · intro call 3/24</div><div class="pcc"><span class="pill pb">Publisher</span></div></div>
+            <div class="pc"><div class="pcn">Crestview Media</div><div class="pcm">MA-2801 · eval</div><div class="pcc"><span class="pill pgy">Affiliate</span></div></div>
+          </div>
+          <div><div class="pch">Contracting <span class="pcnt">2</span></div>
+            <div class="pc ca"><div class="pcn">Sterling Digital</div><div class="pcm">Legal · 9-day delay</div><div class="pcc"><span class="pill pa">⚠ Delayed</span></div></div>
+            <div class="pc"><div class="pcn">Orion Reach</div><div class="pcm">Rate negotiation</div><div class="pcc"><span class="pill pgy">Affiliate</span></div></div>
+          </div>
+          <div><div class="pch">Creative / QA <span class="pcnt">3</span></div>
+            <div class="pc"><div class="pcn">PinPoint Media</div><div class="pcm">MA-2745 · submitted 3/19</div><div class="pcc"><span class="pill pb">In review</span></div></div>
+            <div class="pc"><div class="pcn">TrueNorth Publishers</div><div class="pcm">MA-2762 · compliance</div><div class="pcc"><span class="pill pb">In review</span></div></div>
+            <div class="pc"><div class="pcn">Cascade Advisory</div><div class="pcm">MA-2778 · tracking</div><div class="pcc"><span class="pill pa">Blocked</span></div></div>
+          </div>
+          <div><div class="pch">Onboarding <span class="pcnt">4</span></div>
+            <div class="pc cg"><div class="pcn">Ember Media</div><div class="pcm">LP live 3/15 · monitoring</div><div class="pcc"><span class="pill pg">Live</span></div></div>
+            <div class="pc"><div class="pcn">Kestrel Digital</div><div class="pcm">Pixel setup pending</div></div>
+            <div class="pc"><div class="pcn">Lynx Financial</div><div class="pcm">Creative in review</div></div>
+            <div class="pc cr"><div class="pcn">Momentum Newsletters</div><div class="pcm">60-day gate · kill review</div><div class="pcc"><span class="pill pr">Kill candidate</span></div></div>
+          </div>
+          <div><div class="pch">Live <span class="pcnt">52</span></div>
+            <div class="pc cg"><div class="pcn">4 launched Q1</div><div class="pcm">Ember · Ridgeline · Vantage · Kestrel</div></div>
+            <div class="pc cg"><div class="pcn">NovaStar Media</div><div class="pcm">Top performer · $241K spend</div></div>
+            <div class="pc"><div class="pcn">+48 partners</div><div class="pcm">See scorecards page →</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="g4">
+        <div class="kpi-card"><div class="kpi-label">Avg days to launch</div><div class="kpi-value">34</div><div class="kpi-delta wa">Target: ≤28 days</div></div>
+        <div class="kpi-card"><div class="kpi-label">Q1 new launches</div><div class="kpi-value">7</div><div class="kpi-delta up">↑ Target 5–6 ✓</div></div>
+        <div class="kpi-card"><div class="kpi-label">Hit rate ≥$5K@KPI</div><div class="kpi-value">43%</div><div class="kpi-delta up">↑ Target ≥33% ✓</div></div>
+        <div class="kpi-card"><div class="kpi-label">New partner signup %</div><div class="kpi-value">8.4%</div><div class="kpi-delta wa">Target ≥10% by Q1</div></div>
+      </div>
+    </div>
+
+    <!-- PAGE: NEW PARTNERS -->
+    <div class="page" id="page-newpartners">
+      <div class="sec-label">New partner evaluation queue <span class="src-badge">Internal tracker</span></div>
+      <div class="g4">
+        <div class="kpi-card"><div class="kpi-label">Evaluated Q1</div><div class="kpi-value">18</div><div class="kpi-delta up">YTD</div></div>
+        <div class="kpi-card"><div class="kpi-label">Approved to launch</div><div class="kpi-value">7</div><div class="kpi-delta up">39% approval rate</div></div>
+        <div class="kpi-card"><div class="kpi-label">Declined / paused</div><div class="kpi-value">4</div><div class="kpi-delta wa">2 compliance, 2 fit</div></div>
+        <div class="kpi-card"><div class="kpi-label">In evaluation</div><div class="kpi-value">7</div><div class="kpi-delta up">Active pipeline</div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="pt">Active evaluation queue</div></div>
+        <table class="tbl"><thead><tr><th style="width:20%;">Partner</th><th>Type</th><th>Stage</th><th class="nr">Est. signups/mo</th><th class="nr">Target CPA</th><th class="nr">Est. spend/mo</th><th>Owner</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><div class="pname">BlueSky Finance</div></td><td><span class="pill pb">Publisher</span></td><td>Qualifying</td><td class="nr">80–120</td><td class="nr">$165</td><td class="nr">$14K</td><td>Ross Y.</td><td><span class="pill pb">Intro call 3/24</span></td></tr>
+          <tr><td><div class="pname">Crestview Media</div></td><td><span class="pill pgy">Affiliate</span></td><td>Qualifying</td><td class="nr">40–60</td><td class="nr">$175</td><td class="nr">$8K</td><td>Jordan T.</td><td><span class="pill pgy">In progress</span></td></tr>
+          <tr><td><div class="pname">Sterling Digital</div></td><td><span class="pill pb">Publisher</span></td><td>Contracting</td><td class="nr">100–140</td><td class="nr">$160</td><td class="nr">$18K</td><td>Ross Y.</td><td><span class="pill pa">Legal delay</span></td></tr>
+          <tr><td><div class="pname">Orion Reach</div></td><td><span class="pill pgy">Affiliate</span></td><td>Contracting</td><td class="nr">30–50</td><td class="nr">$180</td><td class="nr">$6K</td><td>Jordan T.</td><td><span class="pill pgy">Rate negotiation</span></td></tr>
+          <tr><td><div class="pname">PinPoint Media</div></td><td><span class="pill pb">Publisher</span></td><td>Creative / QA</td><td class="nr">60–80</td><td class="nr">$170</td><td class="nr">$11K</td><td>Sam R.</td><td><span class="pill pb">In review</span></td></tr>
+          <tr><td><div class="pname">TrueNorth Publishers</div></td><td><span class="pill pb">Publisher</span></td><td>Creative / QA</td><td class="nr">50–70</td><td class="nr">$172</td><td class="nr">$9.5K</td><td>Sam R.</td><td><span class="pill pb">Compliance check</span></td></tr>
+          <tr><td><div class="pname">Cascade Advisory</div></td><td><span class="pill pgy">Affiliate</span></td><td>Creative / QA</td><td class="nr">25–40</td><td class="nr">$180</td><td class="nr">$5K</td><td>Sam R.</td><td><span class="pill pr">Blocked</span></td></tr>
+        </tbody></table>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="pt">Declined / paused this quarter</div></div>
+        <div class="npqr"><div style="flex:1;"><div class="pname">Momentum Newsletters</div><div class="psub">Ad platform · newsletter</div></div><span class="pill pr">Kill pending</span><div style="font-size:11px;color:var(--text-secondary);min-width:80px;text-align:right;">0 CVR</div><div style="font-family:'DM Mono',monospace;font-size:11px;min-width:60px;text-align:right;color:var(--red-text);">$1,550 CPA</div></div>
+        <div class="npqr"><div style="flex:1;"><div class="pname">SkyBridge Affiliates</div><div class="psub">Affiliate · email</div></div><span class="pill pr">Declined</span><div style="font-size:11px;color:var(--text-secondary);min-width:80px;text-align:right;">Compliance fail</div><div style="font-family:'DM Mono',monospace;font-size:11px;min-width:60px;text-align:right;">—</div></div>
+        <div class="npqr"><div style="flex:1;"><div class="pname">Westfall Media</div><div class="psub">Publisher · display</div></div><span class="pill pgy">Paused</span><div style="font-size:11px;color:var(--text-secondary);min-width:80px;text-align:right;">Poor fit</div><div style="font-family:'DM Mono',monospace;font-size:11px;min-width:60px;text-align:right;">—</div></div>
+      </div>
+    </div>
+
+    <!-- PAGE: COMPLIANCE -->
+    <div class="page" id="page-compliance">
+      <div class="sec-label">Compliance flags — 3 open <span class="src-badge">Lashback</span></div>
+      <div class="g4">
+        <div class="kpi-card"><div class="kpi-label">Open flags</div><div class="kpi-value">3</div><div class="kpi-delta dn">1 P1 · 2 P2</div></div>
+        <div class="kpi-card"><div class="kpi-label">Resolved Q1</div><div class="kpi-value">11</div><div class="kpi-delta up">Avg 4.2 days to close</div></div>
+        <div class="kpi-card"><div class="kpi-label">Violations YTD</div><div class="kpi-value">0</div><div class="kpi-delta up">↑ Clean record</div></div>
+        <div class="kpi-card"><div class="kpi-label">Partners monitored</div><div class="kpi-value">52</div><div class="kpi-delta up">Weekly Lashback scans</div></div>
+      </div>
+      <div class="comp-card" style="border-left:3px solid var(--red);">
+        <div class="comp-hd"><div><div class="comp-title">Vantage Digital — Unauthorized sender domain</div><div class="comp-body" style="margin-top:4px;">Flagged by Lashback 3/18. Sending from unregistered domain not in approved list. ~4,200 recipients.</div></div><span class="pill pr">P1 · Open</span></div>
+        <div class="comp-body">Action: Pause partner sends until domain registered and approved. Issue warning per program terms.</div>
+        <div class="comp-ft"><span class="pill pgy">Owner: Sam R.</span><span class="pill pgy">Flagged: 3/18</span><span class="pill pr">Due: 3/22</span></div>
+      </div>
+      <div class="comp-card" style="border-left:3px solid var(--amber);">
+        <div class="comp-hd"><div><div class="comp-title">Ember Media — Missing unsubscribe footer</div><div class="comp-body" style="margin-top:4px;">One campaign batch sent without required unsubscribe link. ~1,800 emails. CAN-SPAM issue.</div></div><span class="pill pa">P2 · In review</span></div>
+        <div class="comp-body">Action: Require resend of compliant version. Confirm checklist updated for future sends.</div>
+        <div class="comp-ft"><span class="pill pgy">Owner: Sam R.</span><span class="pill pgy">Flagged: 3/16</span><span class="pill pa">Due: 3/25</span></div>
+      </div>
+      <div class="comp-card" style="border-left:3px solid var(--amber);">
+        <div class="comp-hd"><div><div class="comp-title">Cascade Advisory — Creative not pre-approved</div><div class="comp-body" style="margin-top:4px;">Partner ran unapproved ad variant on 3 placements. CTA language deviated from approved copy.</div></div><span class="pill pa">P2 · Pending fix</span></div>
+        <div class="comp-body">Action: Pull unapproved creative. Partner must resubmit for approval before resuming.</div>
+        <div class="comp-ft"><span class="pill pgy">Owner: Ross Y.</span><span class="pill pgy">Flagged: 3/17</span><span class="pill pa">Due: 3/24</span></div>
+      </div>
+    </div>
+
+    <!-- PAGE: JIRA -->
+    <div class="page" id="page-jira">
+      <div class="sec-label">Open Jira tickets — 5 active <span class="src-badge">Jira</span></div>
+      <div class="g4">
+        <div class="kpi-card"><div class="kpi-label">Open tickets</div><div class="kpi-value">5</div><div class="kpi-delta dn">2 overdue</div></div>
+        <div class="kpi-card"><div class="kpi-label">Creative</div><div class="kpi-value">2</div><div class="kpi-delta wa">1 blocked</div></div>
+        <div class="kpi-card"><div class="kpi-label">Product</div><div class="kpi-value">2</div><div class="kpi-delta up">On track</div></div>
+        <div class="kpi-card"><div class="kpi-label">Compliance</div><div class="kpi-value">1</div><div class="kpi-delta dn">Overdue</div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="pt">All open tickets</div></div>
+        <div class="tk"><div class="td2 r"></div><div class="tid">AFF-389</div><div class="tb2"><div class="tt">Compliance fix: Vantage Digital unauthorized sender domain</div><div class="tm"><span class="pill pr">Compliance</span> · Sam R.</div></div><div class="tdue" style="color:var(--red-text);">Overdue 3/21</div></div>
+        <div class="tk"><div class="td2 r"></div><div class="tid">AFF-412</div><div class="tb2"><div class="tt">Update Q1 LP creative — NovaStar Media homepage variant</div><div class="tm"><span class="pill pb">Creative</span> · Design team</div></div><div class="tdue" style="color:var(--amber-text);">Due 3/22</div></div>
+        <div class="tk"><div class="td2 a"></div><div class="tid">AFF-398</div><div class="tb2"><div class="tt">Signup flow A/B test — variant B analysis &amp; recommendation</div><div class="tm"><span class="pill pgy">Product</span> · Product team</div></div><div class="tdue">In progress</div></div>
+        <div class="tk"><div class="td2 a"></div><div class="tid">AFF-405</div><div class="tb2"><div class="tt">Tracking pixel — Ember Media landing page</div><div class="tm"><span class="pill pb">Creative</span> · Sam R. · <span style="color:var(--red-text);">Blocked: waiting on pub</span></div></div><div class="tdue">Blocked</div></div>
+        <div class="tk"><div class="td2 b"></div><div class="tid">AFF-421</div><div class="tb2"><div class="tt">Q2 LP variants — ClearPath Financial A/B test setup</div><div class="tm"><span class="pill pgy">Product</span> · Product team</div></div><div class="tdue">Due 3/31</div></div>
+      </div>
+    </div>
+
+    <!-- PAGE: OKRs -->
+    <div class="page" id="page-okrs">
+      <div class="sec-label">Q1 2026 OKRs &amp; execution roadmap <span class="src-badge">OKRs tracker</span></div>
+      <div class="g4">
+        <div class="kpi-card"><div class="kpi-label">OKRs on track</div><div class="kpi-value">3 / 4</div><div class="kpi-delta up">75% green</div></div>
+        <div class="kpi-card"><div class="kpi-label">Key results hit</div><div class="kpi-value">5 / 8</div><div class="kpi-delta wa">3 in progress</div></div>
+        <div class="kpi-card"><div class="kpi-label">Week 12 confidence</div><div class="kpi-value">High</div><div class="kpi-delta up">Per team</div></div>
+        <div class="kpi-card"><div class="kpi-label">Q2 planning</div><div class="kpi-value">In progress</div><div class="kpi-delta up">Draft OKRs ready</div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="pt">Q1 OKR status — all objectives</div></div>
+        <div class="okri"><div class="okrt" style="color:var(--amber);">OKR 1 · Diversify</div><div class="okrk">Drive durable revenue growth — reduce top-3 from ~80% → ≤65%</div><div class="okrn">Current: 76% · Longtail growing · new partners at 8.4% of signups · 11 days left</div><div class="okrb"><div class="okrf" style="width:55%;background:var(--amber);"></div></div></div>
+        <div class="okri"><div class="okrt" style="color:var(--green);">OKR 2 · Activate</div><div class="okrk">Launch 5–6 high-quality new partners · ≥10% of signups by Q1 close</div><div class="okrn">7 launched · hit rate 43% (target ≥33%) ✓ · signup share at 8.4% · on track</div><div class="okrb"><div class="okrf" style="width:88%;background:var(--green);"></div></div></div>
+        <div class="okri"><div class="okrt" style="color:var(--blue);">OKR 3 · Grow</div><div class="okrk">Increase signup CVR +5bp vs Oct '25 baseline (1.4% → 1.45%)</div><div class="okrn">NovaStar LP test live week 10 · ClearPath variant in QA · results pending</div><div class="okrb"><div class="okrf" style="width:60%;background:var(--blue);"></div></div></div>
+        <div class="okri"><div class="okrt" style="color:var(--green);">OKR 4 · Comply</div><div class="okrk">Q1 compliance review with no material violations or partner terminations</div><div class="okrn">3 open flags · P1 Vantage in progress · no program violations · audit on track</div><div class="okrb"><div class="okrf" style="width:85%;background:var(--green);"></div></div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="pt">Weekly execution log · Q1</div></div>
+        <table class="tbl"><thead><tr><th style="width:90px;">Week</th><th style="width:22%;">Focus</th><th>Activate</th><th>Grow / Test</th><th style="width:12%;">Status</th></tr></thead>
+        <tbody>
+          <tr><td style="font-size:10px;color:var(--text-tertiary);">Wk 1 · Jan 5</td><td style="font-weight:500;font-size:11px;">Planning &amp; setup</td><td style="font-size:11px;color:var(--text-secondary);">Pipeline prioritized · tracker live</td><td style="font-size:11px;color:var(--text-secondary);">Test backlog defined</td><td><span class="pill pg">On track</span></td></tr>
+          <tr><td style="font-size:10px;color:var(--text-tertiary);">Wk 2 · Jan 12</td><td style="font-weight:500;font-size:11px;">Coverage week</td><td style="font-size:11px;color:var(--text-secondary);">≥1 partner launch-ready</td><td style="font-size:11px;color:var(--text-secondary);">Funnel builds progressing</td><td><span class="pill pa">Blakely OOO</span></td></tr>
+          <tr><td style="font-size:10px;color:var(--text-tertiary);">Wk 3–4 · Jan 19</td><td style="font-weight:500;font-size:11px;">Launch &amp; validate</td><td style="font-size:11px;color:var(--text-secondary);">Ridgeline + Vantage live · 2 more</td><td style="font-size:11px;color:var(--text-secondary);">NovaStar LP v1 live</td><td><span class="pill pg">On track</span></td></tr>
+          <tr><td style="font-size:10px;color:var(--text-tertiary);">Wk 5–8 · Feb</td><td style="font-weight:500;font-size:11px;">Accelerate &amp; test</td><td style="font-size:11px;color:var(--text-secondary);">3 more launched · Ember live 2/15</td><td style="font-size:11px;color:var(--text-secondary);">LP tests collecting data</td><td><span class="pill pg">On track</span></td></tr>
+          <tr><td style="font-size:10px;color:var(--text-tertiary);">Wk 9–11 · Mar</td><td style="font-weight:500;font-size:11px;">Scale what works</td><td style="font-size:11px;color:var(--text-secondary);">Kestrel onboarding · Momentum kill</td><td style="font-size:11px;color:var(--text-secondary);">ClearPath variant B live</td><td><span class="pill pg">On track</span></td></tr>
+          <tr><td style="font-size:10px;color:var(--text-tertiary);">Wk 12 · Mar 23</td><td style="font-weight:500;font-size:11px;">Close the quarter</td><td style="font-size:11px;color:var(--text-secondary);">Momentum kill decision · Q1 wrap</td><td style="font-size:11px;color:var(--text-secondary);">Q2 OKR input &amp; handoff</td><td><span class="pill pb">In progress</span></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ── DATA ──
+const PD = {
+  "wtd": {
+    "label": "Week of Mar 16\u201321, 2026",
+    "spend": "$43K",
+    "signups": "230",
+    "paids": "84",
+    "cpa": "$187",
+    "pcpa": "$511",
+    "pr": "36.5%",
+    "sd": "wa|86% to target ($50K)",
+    "sgd": "wa|88% to target (260)",
+    "pad": "wa|80% to target (105)",
+    "cpad": "dn|\u2193 $12 over target ($175)",
+    "pcpad": "dn|\u2193 Over target ($480)",
+    "prd": "up|\u2191 vs prior period",
+    "sb": "86%",
+    "sbc": "var(--amber)",
+    "sgb": "88%",
+    "sgbc": "var(--amber)",
+    "pab": "80%",
+    "pabc": "var(--amber)",
+    "cpab": "100%",
+    "cpabc": "var(--red)",
+    "pcpab": "97%",
+    "pcpabc": "var(--red)",
+    "prb": "85%",
+    "prbc": "var(--green)",
+    "clbl": "Week of Mar 16\u201321, 2026",
+    "jv": "1,101 \u00b7 99%",
+    "jc": "var(--amber-text)",
+    "jw": "99%",
+    "jbc": "var(--amber)",
+    "fv": "1,036 \u00b7 92%",
+    "fc": "var(--amber-text)",
+    "fw": "92%",
+    "fbc": "var(--amber)",
+    "mv": "230",
+    "mc": "var(--blue-text)",
+    "mw": "88%",
+    "mbc": "var(--blue)",
+    "ss": "$50K",
+    "si": "260",
+    "rep": "230",
+    "nonrep": "420",
+    "cpav": "$187 \u00b7 $12 over",
+    "cpan": "Target \u2264$175",
+    "rv": "$43K",
+    "rrev": "$59K",
+    "rmarg": "$1K",
+    "rpct": "2.3%",
+    "cl": [
+      "Mon 3/16",
+      "Tue 3/17",
+      "Wed 3/18",
+      "Thu 3/19",
+      "Fri 3/20",
+      "Sat 3/21"
+    ],
+    "cs": [
+      38,
+      45,
+      42,
+      39,
+      41,
+      25
+    ],
+    "cp": [
+      14,
+      18,
+      15,
+      14,
+      15,
+      8
+    ],
+    "ct": [
+      39,
+      39,
+      39,
+      39,
+      39,
+      39
+    ]
+  },
+  "mtd": {
+    "label": "March MTD \u00b7 Mar 1\u201324, 2026",
+    "spend": "$164K",
+    "signups": "882",
+    "paids": "369",
+    "cpa": "$186",
+    "pcpa": "$445",
+    "pr": "41.8%",
+    "sd": "wa|89% of pace \u00b7 $184,258 expected by day 24",
+    "sgd": "wa|95% of pace \u00b7 932 expected by day 24",
+    "pad": "wa|89% of pace \u00b7 416 expected by day 24",
+    "cpad": "up|\u2191 $12 under target ($198) \u2713",
+    "pcpad": "dn|\u2193 $2 over target ($443)",
+    "prd": "dn|\u2193 2.8pp vs plan (44.6%)",
+    "sb": "89%",
+    "sbc": "var(--amber)",
+    "sgb": "95%",
+    "sgbc": "var(--amber)",
+    "pab": "89%",
+    "pabc": "var(--amber)",
+    "cpab": "90%",
+    "cpabc": "var(--green)",
+    "pcpab": "90%",
+    "pcpabc": "var(--green)",
+    "prb": "85%",
+    "prbc": "var(--green)",
+    "jv": "1,101 \u00b7 99%",
+    "jc": "var(--amber-text)",
+    "jw": "99%",
+    "jbc": "var(--amber)",
+    "fv": "1,036 \u00b7 92%",
+    "fc": "var(--amber-text)",
+    "fw": "92%",
+    "fbc": "var(--amber)",
+    "mv": "882 \u00b7 95% of pace",
+    "mc": "var(--amber-text)",
+    "mw": "95%",
+    "mbc": "var(--amber)",
+    "ss": "$238K",
+    "si": "1,204",
+    "cpav": "$188 \u00b7 $10 under target \u2713",
+    "cpan": "Target \u2264$198",
+    "rep": "779",
+    "nonrep": "420",
+    "rv": "$146K",
+    "rrev": "$202K",
+    "rmarg": "$20K",
+    "rpct": "14.2%",
+    "clbl": "Daily signups & new customers \u00b7 March MTD",
+    "cl": [
+      "3/1",
+      "3/3",
+      "3/5",
+      "3/7",
+      "3/9",
+      "3/11",
+      "3/13",
+      "3/15",
+      "3/17",
+      "3/19",
+      "3/21"
+    ],
+    "cs": [
+      31,
+      38,
+      28,
+      42,
+      36,
+      45,
+      39,
+      52,
+      41,
+      48,
+      44
+    ],
+    "cp": [
+      12,
+      14,
+      10,
+      17,
+      14,
+      18,
+      15,
+      21,
+      16,
+      19,
+      17
+    ],
+    "ct": [
+      39,
+      39,
+      39,
+      39,
+      39,
+      39,
+      39,
+      39,
+      39,
+      39,
+      39
+    ]
+  },
+  "ytd": {
+    "label": "YTD 2026 \u00b7 Jan 1\u2013Mar 21 \u00b7 9 days left in Q1",
+    "spend": "$514K",
+    "signups": "2,923",
+    "paids": "1,123",
+    "cpa": "$176",
+    "pcpa": "$457",
+    "pr": "38.4%",
+    "sd": "wa|85% to target ($601K)",
+    "sgd": "wa|88% to target (3,319)",
+    "pad": "wa|89% to target (1,259)",
+    "cpad": "dn|\u2193 $1 over target ($175)",
+    "pcpad": "up|\u2191 On target ($480)",
+    "prd": "up|\u2191 vs prior period",
+    "sb": "85%",
+    "sbc": "var(--amber)",
+    "sgb": "88%",
+    "sgbc": "var(--amber)",
+    "pab": "89%",
+    "pabc": "var(--amber)",
+    "cpab": "100%",
+    "cpabc": "var(--red)",
+    "pcpab": "97%",
+    "pcpabc": "var(--green)",
+    "prb": "85%",
+    "prbc": "var(--green)",
+    "clbl": "YTD 2026 \u00b7 Jan 1\u2013Mar 21 \u00b7 9 days left in Q1",
+    "jv": "1,101 \u00b7 99%",
+    "jc": "var(--amber-text)",
+    "jw": "99%",
+    "jbc": "var(--amber)",
+    "fv": "1,036 \u00b7 92%",
+    "fc": "var(--amber-text)",
+    "fw": "92%",
+    "fbc": "var(--amber)",
+    "mv": "779 \u00b7 95% of pace",
+    "mc": "var(--amber-text)",
+    "mw": "95%",
+    "mbc": "var(--amber)",
+    "ss": "$601K",
+    "si": "3,319",
+    "rep": "2923",
+    "nonrep": "420",
+    "cpav": "$176 \u00b7 $1 over",
+    "cpan": "Target \u2264$175",
+    "rv": "$514K",
+    "rrev": "$736K",
+    "rmarg": "$19K",
+    "rpct": "2.6%",
+    "cl": [
+      "W1",
+      "W2",
+      "W3",
+      "W4",
+      "W5",
+      "W6",
+      "W7",
+      "W8",
+      "W9",
+      "W10",
+      "W11",
+      "W12"
+    ],
+    "cs": [
+      268,
+      241,
+      304,
+      288,
+      225,
+      261,
+      318,
+      308,
+      290,
+      342,
+      302,
+      274
+    ],
+    "cp": [
+      100,
+      92,
+      122,
+      102,
+      84,
+      98,
+      124,
+      118,
+      110,
+      136,
+      118,
+      108
+    ],
+    "ct": [
+      277,
+      277,
+      277,
+      277,
+      277,
+      277,
+      277,
+      277,
+      277,
+      277,
+      277,
+      277
+    ]
+  }
+};
+
+const PARTNERS = { wtd: null, mtd: null, ytd: null };
+
+const REVROWS = {"wtd": [{"n": "WalletIQ", "sp": "$18K", "rv": "$25K", "pf": "+$240", "mg": "1.0%", "cp": "$235", "pr": "44.0%", "h": "pa"}, {"n": "ClearScore Media", "sp": "$11K", "rv": "$16K", "pf": "+$344", "mg": "2.2%", "cp": "$366", "pr": "60.0%", "h": "pa"}, {"n": "RateCompass", "sp": "$3K", "rv": "$6K", "pf": "+$251", "mg": "3.9%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Finwise Publishing", "sp": "$3K", "rv": "$3K", "pf": "$27", "mg": "-0.9%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Apex Media Group", "sp": "$3K", "rv": "$5K", "pf": "+$149", "mg": "3.3%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "NorthStar Digital", "sp": "$2K", "rv": "$2K", "pf": "+$0", "mg": "0.0%", "cp": "$178", "pr": "66.7%", "h": "pa"}, {"n": "MomentScience - AdsPostX", "sp": "$698", "rv": "$400", "pf": "+$45", "mg": "11.2%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "VelocityFin", "sp": "$544", "rv": "$160", "pf": "$12", "mg": "-7.2%", "cp": "$181", "pr": "\u2014", "h": "pa"}, {"n": "TrustPillar", "sp": "$450", "rv": "$600", "pf": "+$75", "mg": "12.5%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Beacon Publishing", "sp": "$408", "rv": "$0", "pf": "+$0", "mg": "\u2014", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Veritas Digital.", "sp": "$200", "rv": "$240", "pf": "+$17", "mg": "6.9%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "RX Marketing", "sp": "$200", "rv": "$240", "pf": "+$17", "mg": "6.9%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Globalwide Media Limited", "sp": "$180", "rv": "$225", "pf": "+$20", "mg": "8.9%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "LeadBridge Inc", "sp": "$138", "rv": "$351", "pf": "+$178", "mg": "50.6%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Streamline Partners", "sp": "$100", "rv": "$160", "pf": "+$38", "mg": "23.4%", "cp": "$33", "pr": "\u2014", "h": "pa"}, {"n": "Meridian Digital - Internet Brands", "sp": "$46", "rv": "$0", "pf": "+$0", "mg": "\u2014", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "BrightRate", "sp": "$0", "rv": "$0", "pf": "+$0", "mg": "\u2014", "cp": "\u2014", "pr": "\u2014", "h": "pa"}], "mtd": [{"n": "WalletIQ", "sp": "$69K", "rv": "$98K", "pf": "+$840", "mg": "0.9%", "cp": "$218", "pr": "39.2%", "h": "pg"}, {"n": "ClearScore Media", "sp": "$39K", "rv": "$56K", "pf": "+$1,249", "mg": "2.2%", "cp": "$359", "pr": "91.7%", "h": "pg"}, {"n": "RateCompass", "sp": "$10K", "rv": "$17K", "pf": "+$707", "mg": "4.0%", "cp": "\u2014", "pr": "\u2014", "h": "pg"}, {"n": "Apex Media Group", "sp": "$7K", "rv": "$11K", "pf": "+$559", "mg": "5.0%", "cp": "\u2014", "pr": "\u2014", "h": "pg"}, {"n": "NorthStar Digital", "sp": "$6K", "rv": "$6K", "pf": "+$11", "mg": "0.2%", "cp": "$166", "pr": "31.4%", "h": "pa"}, {"n": "Finwise Publishing", "sp": "$4K", "rv": "$4K", "pf": "+$18", "mg": "0.4%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Beacon Publishing", "sp": "$3K", "rv": "$0", "pf": "+$0", "mg": "\u2014", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "TrustPillar", "sp": "$2K", "rv": "$2K", "pf": "+$225", "mg": "10.2%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "BrightRate", "sp": "$2K", "rv": "$2K", "pf": "+$120", "mg": "6.0%", "cp": "$1600", "pr": "\u2014", "h": "pa"}, {"n": "Best Company (SkyRocket)", "sp": "$1K", "rv": "$1K", "pf": "+$150", "mg": "10.7%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "MomentScience - AdsPostX", "sp": "$708", "rv": "$1K", "pf": "+$144", "mg": "14.4%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "VelocityFin", "sp": "$544", "rv": "$160", "pf": "$12", "mg": "-7.2%", "cp": "$181", "pr": "\u2014", "h": "pa"}, {"n": "LeadBridge Inc", "sp": "$532", "rv": "$1K", "pf": "+$652", "mg": "55.7%", "cp": "\u2014", "pr": "\u2014", "h": "pg"}, {"n": "BladeFinance", "sp": "$500", "rv": "$2K", "pf": "+$391", "mg": "16.3%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Firstcard, Inc.", "sp": "$450", "rv": "$600", "pf": "+$75", "mg": "12.5%", "cp": "$150", "pr": "\u2014", "h": "pa"}, {"n": "Globalwide Media Limited", "sp": "$360", "rv": "$450", "pf": "+$40", "mg": "8.9%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Streamline Partners", "sp": "$340", "rv": "$640", "pf": "+$288", "mg": "44.9%", "cp": "$28", "pr": "\u2014", "h": "pa"}, {"n": "Veritas Digital.", "sp": "$200", "rv": "$240", "pf": "+$17", "mg": "6.9%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "RX Marketing", "sp": "$200", "rv": "$240", "pf": "+$17", "mg": "6.9%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Meridian Digital - Internet Brands", "sp": "$196", "rv": "$0", "pf": "+$0", "mg": "\u2014", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Approved Apartment Locators", "sp": "$150", "rv": "$200", "pf": "+$25", "mg": "12.5%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "FairFigure, Inc.", "sp": "$150", "rv": "$200", "pf": "+$25", "mg": "12.5%", "cp": "$150", "pr": "\u2014", "h": "pa"}], "ytd": [{"n": "WalletIQ", "sp": "$237K", "rv": "$339K", "pf": "+$3,540", "mg": "1.0%", "cp": "$197", "pr": "35.1%", "h": "pg"}, {"n": "ClearScore Media", "sp": "$158K", "rv": "$228K", "pf": "+$5,022", "mg": "2.2%", "cp": "$325", "pr": "71.5%", "h": "pg"}, {"n": "RateCompass", "sp": "$34K", "rv": "$59K", "pf": "+$2,134", "mg": "3.6%", "cp": "\u2014", "pr": "\u2014", "h": "pg"}, {"n": "NorthStar Digital", "sp": "$22K", "rv": "$23K", "pf": "+$43", "mg": "0.2%", "cp": "$148", "pr": "19.9%", "h": "pa"}, {"n": "Apex Media Group", "sp": "$18K", "rv": "$34K", "pf": "+$2,007", "mg": "5.9%", "cp": "\u2014", "pr": "\u2014", "h": "pg"}, {"n": "BrightRate", "sp": "$8K", "rv": "$10K", "pf": "+$540", "mg": "5.7%", "cp": "$7600", "pr": "\u2014", "h": "pg"}, {"n": "Finwise Publishing", "sp": "$7K", "rv": "$8K", "pf": "+$262", "mg": "3.4%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Beacon Publishing", "sp": "$6K", "rv": "$2K", "pf": "$34", "mg": "-2.0%", "cp": "$2120", "pr": "\u2014", "h": "pa"}, {"n": "Veritas Digital.", "sp": "$4K", "rv": "$5K", "pf": "+$267", "mg": "5.8%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Best Company (SkyRocket)", "sp": "$3K", "rv": "$3K", "pf": "+$350", "mg": "10.3%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Red Ventures", "sp": "$3K", "rv": "$3K", "pf": "+$128", "mg": "3.9%", "cp": "$255", "pr": "36.4%", "h": "pa"}, {"n": "TrustPillar", "sp": "$3K", "rv": "$4K", "pf": "+$375", "mg": "10.4%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "LeadBridge Inc", "sp": "$3K", "rv": "$5K", "pf": "+$2,454", "mg": "47.7%", "cp": "\u2014", "pr": "\u2014", "h": "pg"}, {"n": "Firstcard, Inc.", "sp": "$2K", "rv": "$2K", "pf": "+$175", "mg": "8.0%", "cp": "$110", "pr": "\u2014", "h": "pa"}, {"n": "RX Marketing", "sp": "$1K", "rv": "$1K", "pf": "+$50", "mg": "4.2%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "BladeFinance", "sp": "$955", "rv": "$5K", "pf": "+$894", "mg": "17.2%", "cp": "\u2014", "pr": "\u2014", "h": "pg"}, {"n": "Applied Minds", "sp": "$950", "rv": "$2K", "pf": "+$183", "mg": "10.4%", "cp": "$136", "pr": "57.1%", "h": "pa"}, {"n": "Streamline Partners", "sp": "$780", "rv": "$1K", "pf": "+$408", "mg": "40.3%", "cp": "$60", "pr": "7.7%", "h": "pa"}, {"n": "FairFigure, Inc.", "sp": "$750", "rv": "$1K", "pf": "+$125", "mg": "12.5%", "cp": "$150", "pr": "\u2014", "h": "pa"}, {"n": "MomentScience - AdsPostX", "sp": "$708", "rv": "$1K", "pf": "+$144", "mg": "14.4%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "VelocityFin", "sp": "$544", "rv": "$160", "pf": "$12", "mg": "-7.2%", "cp": "$181", "pr": "33.3%", "h": "pa"}, {"n": "Globalwide Media Limited", "sp": "$540", "rv": "$675", "pf": "+$60", "mg": "8.9%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Approved Apartment Locators", "sp": "$300", "rv": "$400", "pf": "+$50", "mg": "12.5%", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Meridian Digital - Internet Brands", "sp": "$196", "rv": "$0", "pf": "+$0", "mg": "\u2014", "cp": "\u2014", "pr": "\u2014", "h": "pa"}, {"n": "Popular Marketing LLC", "sp": "$150", "rv": "$200", "pf": "+$25", "mg": "12.5%", "cp": "$150", "pr": "200.0%", "h": "pa"}, {"n": "Casulo Media, LLC", "sp": "$0", "rv": "$0", "pf": "+$0", "mg": "\u2014", "cp": "\u2014", "pr": "\u2014", "h": "pa"}]};
+
+// ── STATE ──
+let period = 'mtd', page = 'command';
+let tChart = null, mChart = null, spChart = null, scChart = null;
+
+// ── HELPERS ──
+const $=id=>document.getElementById(id);
+function setEl(id,val,prop='textContent'){const el=$(id);if(el)el[prop]=val;}
+function sparkH(vals,col){const m=Math.max(...vals)||1;return vals.map(v=>`<div class="sb" style="height:${Math.max(8,Math.round(v/m*100))}%;background:${col};"></div>`).join('');}
+const STCOL={pg:'var(--green)',pa:'var(--amber)',pr:'var(--red)',pb:'var(--blue)',pgy:'var(--text-tertiary)'};
+
+// ── NAV ──
+function navTo(pg){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $('page-'+pg).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.toggle('active',i.dataset.page===pg));
+  page=pg;
+  const titles={command:'Command center',scorecards:'Partner scorecards',revenue:'Revenue deep dive',pipeline:'Biz dev pipeline',newpartners:'New partner queue',compliance:'Compliance flags',jira:'Jira tickets',okrs:'OKRs & roadmap'};
+  setEl('pgTitle',titles[pg]||pg);
+  const showP=['command','scorecards','revenue'].includes(pg);
+  $('periodTabs').style.opacity=showP?'1':'0.35';
+  $('periodTabs').style.pointerEvents=showP?'':'none';
+  if(pg==='revenue')renderRevenue();
+  if(pg==='scorecards')renderScorecards();
+}
+
+document.querySelectorAll('.sb-item').forEach(i=>i.addEventListener('click',()=>navTo(i.dataset.page)));
+
+// ── PERIOD ──
+document.querySelectorAll('.pt-btn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.pt-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  period=b.dataset.p;
+  applyPeriod(period);
+  if(page==='revenue')renderRevenue();
+  if(page==='scorecards')renderScorecards();
+}));
+
+
+// ── Pacing color scale ──
+// pct = actual / expected-to-date × 100
+function paceColor(pct) {
+  if (pct >= 100) return { bar: 'var(--green)',       text: 'var(--green-text)',  cls: 'up' };
+  if (pct >= 80)  return { bar: 'var(--amber)',       text: 'var(--amber-text)', cls: 'wa' };
+  return           { bar: 'var(--red)',         text: 'var(--red-text)',   cls: 'dn' };
+}
+
+// Helper: compute pacing-to-date %
+// actual: signups so far, monthTarget: full month target, daysElapsed: days in month so far, daysTotal: days in month
+function pacingPct(actual, monthTarget, daysElapsed, daysTotal) {
+  const expected = Math.round(monthTarget / daysTotal * daysElapsed);
+  return expected > 0 ? Math.round(actual / expected * 100) : 100;
+}
+
+// ── Update row-2 KPIs (clicks, CVR, CPC, revenue, margin) ──
+function updateRow2(p) {
+  const ef  = EVERFLOW_DATA[p] || EVERFLOW_SEED[p] || {};
+  const tab = TABLEAU_DATA[p] || {};
+  const PAID_LTR = {
+    'WalletIQ':572,'ClearScore Media':724,'RateCompass':274,
+    'Apex Media Group':918,'NorthStar Digital':483,'Longtail':705
+  };
+  const DEFAULT_LTR = 600;
+  const sp  = Object.values(ef).reduce((s,v)=>s+(v.sp||0),0);
+  const cl  = Object.values(ef).reduce((s,v)=>s+(v.cl||0),0);
+  const sg  = Object.values(tab).reduce((s,v)=>s+(v.signups||0),0);
+  const pa  = Object.values(tab).reduce((s,v)=>s+(v.paids||0),0);
+  const rev = Object.entries(tab).reduce((s,[name,v])=>s+(v.paids||0)*(PAID_LTR[name]||DEFAULT_LTR),0);
+  const mg  = rev - sp;
+  const mgp = sp > 0 ? Math.round(mg/sp*1000)/10 : 0;
+  const cvr = cl > 0 ? Math.round(sg/cl*10000)/100 : 0;
+  const cpc = cl > 0 ? Math.round(sp/cl*100)/100 : 0;
+
+  const T_CLICKS = { wtd: 68045/31*7, mtd: 68045, ytd: 68045*3 };
+  const tgt = T_CLICKS[p] || T_CLICKS.mtd;
+  const dEl = p==='mtd'?23:p==='wtd'?1:83; // days elapsed approx
+  const dTo = p==='mtd'?31:p==='wtd'?7:90;
+  const expCl = Math.round(tgt/dTo*dEl);
+  const pctCl = expCl>0 ? Math.round(cl/expCl*100) : 100;
+  const T_CVR = 1.77;
+  const T_CPC = Math.round(238000/68045*100)/100;
+
+  const paceColor = pct => pct>=100?'var(--green)':pct>=80?'var(--amber)':'var(--red)';
+  const paceClass = pct => pct>=100?'up':pct>=80?'wa':'dn';
+
+  const set = (id,val) => { const e=document.getElementById(id); if(e) e.textContent=val; };
+  const setStyle = (id,prop,val) => { const e=document.getElementById(id); if(e) e.style[prop]=val; };
+  const setCls = (id,cls) => { const e=document.getElementById(id); if(e) e.className='kpi-delta '+cls; };
+
+  set('v-clicks', cl.toLocaleString());
+  set('d-clicks', pctCl+'% of pace · '+expCl.toLocaleString()+' expected');
+  setCls('d-clicks', paceClass(pctCl));
+  setStyle('b-clicks','width',Math.min(pctCl,100)+'%');
+  setStyle('b-clicks','background',paceColor(pctCl));
+
+  set('v-cvr', cvr.toFixed(2)+'%');
+  set('d-cvr', cvr>=T_CVR ? '↑ +'+(cvr-T_CVR).toFixed(2)+'pp vs '+T_CVR+'% target' : '↓ '+(T_CVR-cvr).toFixed(2)+'pp below '+T_CVR+'% target');
+  setCls('d-cvr', cvr>=T_CVR?'up':'dn');
+  setStyle('b-cvr','width',Math.min(Math.round(cvr/T_CVR*100),100)+'%');
+  setStyle('b-cvr','background',cvr>=T_CVR?'var(--green)':'var(--amber)');
+
+  set('v-cpc', '$'+cpc.toFixed(2));
+  set('d-cpc', cpc<=T_CPC ? '↑ $'+(T_CPC-cpc).toFixed(2)+' under target ($'+T_CPC+') ✓' : '↓ $'+(cpc-T_CPC).toFixed(2)+' over target ($'+T_CPC+')');
+  setCls('d-cpc', cpc<=T_CPC?'up':'dn');
+
+  const revK = Math.round(rev/1000);
+  const mgK  = Math.round(mg/1000);
+  set('v-rev2', '$'+revK+'K');
+  set('d-rev2', (mg>=0?'+':'')+'$'+mgK+'K margin · '+mgp+'% on spend');
+  setCls('d-rev2', mg>0?'up':'dn');
+
+  set('v-mgdollar', (mg>=0?'+$':'-$')+Math.abs(mgK)+'K');
+  set('d-mgdollar', mgp+'% margin · $'+Math.round(sp/1000)+'K spend');
+  setCls('d-mgdollar', mg>0?'up':'dn');
+  setStyle('b-mgdollar','background',mg>0?'var(--green)':'var(--red)');
+
+  set('v-mgpct', mgp+'%');
+  set('d-mgpct', '$'+(mg>=0?'+':'')+mgK+'K on $'+Math.round(sp/1000)+'K spend');
+  setCls('d-mgpct', mgp>20?'up':mgp>0?'wa':'dn');
+  setStyle('b-mgpct','background',mgp>20?'var(--green)':mgp>0?'var(--amber)':'var(--red)');
+}
+function applyPeriod(p){
+  const d=PD[p];
+  setEl('pgSub',d.label);
+  // KPIs
+  const kmap=[['spend','sd','sb','sbc'],['signups','sgd','sgb','sgbc'],['paids','pad','pab','pabc'],['cpa','cpad','cpab','cpabc'],['pcpa','pcpad','pcpab','pcpabc'],['pr','prd','prb','prbc']];
+  const kkeys=['spend','signups','paids','cpa','pcpa','pr'];
+  kkeys.forEach((k,i)=>{
+    setEl('v-'+k,d[k]);
+    const parts=(d[kmap[i][1]]||'up|').split('|');
+    const el=$('d-'+k);if(el){el.className='kpi-delta '+(parts[0]||'up');el.textContent=parts[1]||'';}
+    const bar=$('b-'+k);if(bar){bar.style.width=d[kmap[i][2]];bar.style.background=d[kmap[i][3]];}
+  });
+  // Pacing — apply gradient color scale
+  [['jan','j'],['feb','f'],['mar','m']].forEach(([m,k])=>{
+    const el=$('pv-'+m);
+    if(el){
+      el.textContent=d[k+'v'];
+      // Extract pct from the value string e.g. "1,108 · 92%" → 92
+      const pctMatch = (d[k+'v']||'').match(/(\d+)%/);
+      const pct = pctMatch ? parseInt(pctMatch[1]) : 100;
+      const c = paceColor(pct);
+      el.style.color = c.text;
+      const pf=$('pf-'+m);
+      if(pf){pf.style.width=d[k+'w'];pf.style.background=c.bar;}
+    }
+  });
+  setEl('s-spend',d.ss);setEl('s-sig',d.si);
+  setEl('r-rep',d.rep);setEl('r-nonrep',d.nonrep);
+  setEl('cpa-v',d.cpav);setEl('cpa-n',d.cpan);
+  setEl('chartLbl',d.clbl);
+  // Chart
+  if(tChart){tChart.data.labels=d.cl;tChart.data.datasets[0].data=d.cs;tChart.data.datasets[1].data=d.cp;tChart.data.datasets[2].data=d.ct;tChart.update();}
+  // Partner table — use merged Tableau+EF data if available, then sort
+  updateRow2(p);
+  const tabForPeriod = (typeof TABLEAU_DATA !== 'undefined') ? TABLEAU_DATA[p] : null;
+  if (tabForPeriod && Object.keys(tabForPeriod).length > 0) {
+    PARTNERS[p] = buildMergedPartners(p);
+    renderPartnerTable();
+    updateKPIsFromTableau(p);
+  } else {
+    // Tableau data not available for this period — try buildMergedPartners anyway (EF-only rows)
+    if (!PARTNERS[p]) PARTNERS[p] = buildMergedPartners(p);
+    renderPartnerTable();
+  }
+}
+
+// ── TREND CHART INIT ──
+function initTrendChart(){
+  const d=PD[period]||PD.mtd;
+  const ctx=$('trendChart').getContext('2d');
+  tChart=new Chart(ctx,{type:'line',data:{labels:d.cl,datasets:[
+    {label:'Signups',data:d.cs,borderColor:'#4F9CF9',backgroundColor:'rgba(79,156,249,.07)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#4F9CF9',borderWidth:2},
+    {label:'New Customers',data:d.cp,borderColor:'#2DD4A4',backgroundColor:'rgba(45,212,164,.05)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#2DD4A4',borderWidth:2,yAxisID:'y1'},
+    {label:'Target',data:d.ct,borderColor:'#F05252',borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,backgroundColor:'rgba(26,39,51,.95)',borderColor:'rgba(255,255,255,.1)',borderWidth:1,titleColor:'#8B9BA8',bodyColor:'#F0EDE8',padding:10}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#546370',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#546370',font:{size:10}}},y1:{position:'right',grid:{display:false},ticks:{color:'#546370',font:{size:10}}}}}});
+}
+
+// ── REVENUE PAGE ──
+function renderRevenue(){
+  const d=PD[period];
+  setEl('rv-spend',d.rv);setEl('rv-rev',d.rrev);setEl('rv-margin',d.rmarg);setEl('rv-pct',d.rpct);
+  const rows=(REVROWS[period]||REVROWS.mtd);
+  const tb=$('revTbody');
+  if(tb)tb.innerHTML=rows.map(r=>`<tr>
+    <td><div class="pname">${r.n}</div></td>
+    <td class="nr">${r.sp}</td><td class="nr">${r.rv}</td>
+    <td class="nr" style="color:${r.pf.startsWith('+')?'var(--green-text)':'var(--red-text)'};">${r.pf}</td>
+    <td class="nr" style="color:${parseFloat(r.mg)>0?'var(--green-text)':r.mg==='—'?'var(--text-tertiary)':'var(--red-text)'};">${r.mg}</td>
+    <td class="nr">${r.cp}</td><td class="nr">${r.pr}</td>
+    <td><span class="pill ${r.h}">${r.h==='pg'?'Healthy':r.h==='pa'?'Watch':'At risk'}</span></td>
+  </tr>`).join('');
+
+  if(mChart){mChart.destroy();mChart=null;}
+  const mc=$('marginChart');
+  if(mc)mChart=new Chart(mc.getContext('2d'),{type:'bar',data:{labels:rows.map(r=>r.n.split(' ')[0]),datasets:[{label:'Profit',data:rows.map(r=>{const n=parseFloat(r.pf.replace(/[+$KM,]/g,''));return r.pf.startsWith('-')?-n:n;}),backgroundColor:rows.map(r=>r.pf.startsWith('+')?'rgba(45,212,164,.6)':'rgba(240,82,82,.6)'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#546370',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#546370',font:{size:10}}}}}});
+
+  if(spChart){spChart.destroy();spChart=null;}
+  const sc=$('spendChart');
+  if(sc)spChart=new Chart(sc.getContext('2d'),{type:'doughnut',data:{labels:rows.map(r=>r.n.split(' ')[0]),datasets:[{data:rows.map(r=>parseFloat(r.sp.replace(/[$KM,]/g,''))||0),backgroundColor:['#4F9CF9','#F5A623','#2DD4A4','#38BDF8','#A78BFA','#F05252'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8B9BA8',font:{size:10},boxWidth:10}}}}});
+}
+
+// ── SCORECARD PAGE ──
+function renderScorecards(){
+  const ps=PARTNERS[period]||PARTNERS.mtd||[];
+  $('scorecardGrid').innerHTML=ps.map((p,i)=>`
+    <div class="sc-card" onclick="openScorecard(${i})">
+      <div class="scn">${p.n}</div><div class="sct">${p.t}</div>
+      <span class="pill ${p.st}">${p.sl}</span>
+      <div class="scm">
+        <div class="scmb"><div class="scmv">${p.sp}</div><div class="scml">Spend</div></div>
+        <div class="scmb"><div class="scmv">${p.cl}</div><div class="scml">Clicks</div></div>
+        <div class="scmb"><div class="scmv">${p.pa}</div><div class="scml">New Customers</div></div>
+      </div>
+    </div>`).join('');
+}
+
+function openScorecard(i){
+  const ps=PARTNERS[period]||PARTNERS.mtd||[];
+  const p=ps[i];
+  document.querySelectorAll('.sc-card').forEach((c,j)=>c.classList.toggle('sel',j===i));
+  setEl('scDetailName',p.n+' — Scorecard');
+  const mets=[{v:p.sp,l:'Spend'},{v:p.cl,l:'Clicks'},{v:p.sg,l:'Signups'},{v:p.cp,l:'CPA'},{v:p.pa,l:'New Customers'},{v:p.pr,l:'Customer CVR'},{v:p.mg,l:'Margin'},{v:p.cv,l:'Signup CVR'},{v:p.sl,l:'Status'}];
+  $('scDetailMetrics').innerHTML=mets.map(m=>`<div class="scmb"><div class="scmv" style="font-size:16px;">${m.v}</div><div class="scml">${m.l}</div></div>`).join('');
+  $('scDetail').style.display='block';
+  if(scChart){scChart.destroy();scChart=null;}
+  const cv=$('scChart');
+  const lbl=PD[period].cl.slice(0,p.sk.length);
+  const maxSg=parseInt(p.sg.replace(/,/g,''))||100;
+  const mx=Math.max(...p.sk)||1;
+  scChart=new Chart(cv.getContext('2d'),{type:'line',data:{labels:lbl,datasets:[{label:'Signups',data:p.sk.map(v=>Math.round(v/mx*maxSg)),borderColor:'#4F9CF9',backgroundColor:'rgba(79,156,249,.07)',fill:true,tension:.4,pointRadius:3,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#546370',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#546370',font:{size:10}}}}}});
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded',()=>{
+  initTrendChart();
+  applyPeriod('mtd');
+  // Always overwrite KPI signups/paids/payrate with Tableau source-of-truth
+  setTimeout(() => { updateKPIsFromTableau('mtd'); renderPaceAlert(); }, 0);
+});
+</script>
+<script>
+// ══════════════════════════════════════════
+// SORT ENGINE
+// ══════════════════════════════════════════
+let sortCol = 'sp', sortDir = -1; // default: spend descending
+
+// Extract a numeric sort key from a display string like "$241K", "1,280", "40.2%", "+$22K"
+function sortKey(val) {
+  if (!val || val === '—') return -Infinity;
+  const s = String(val).replace(/[+$,%\s]/g, '');
+  const n = parseFloat(s.replace(/[^0-9.-]/g, ''));
+  if (isNaN(n)) return -Infinity;
+  if (s.toUpperCase().includes('K')) return n * 1000;
+  if (s.toUpperCase().includes('M')) return n * 1000000;
+  return n;
+}
+
+function sortPartners(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = -1; }
+
+  // Update header indicators
+  document.querySelectorAll('.sh').forEach(th => {
+    th.classList.remove('asc','desc');
+    const si = th.querySelector('.si');
+    if (si) si.textContent = '';
+  });
+  const activeEl = document.getElementById('si-' + col);
+  const activeTh = activeEl?.closest('th');
+  if (activeEl) activeEl.textContent = sortDir === -1 ? '↓' : '↑';
+  if (activeTh) activeTh.classList.add(sortDir === -1 ? 'desc' : 'asc');
+
+  renderPartnerTable();
+}
+
+function renderPartnerTable() {
+  const rows = [...(PARTNERS[period] || PARTNERS.mtd || [])];
+  rows.sort((a, b) => sortDir * (sortKey(a[sortCol]) - sortKey(b[sortCol])));
+
+  const tb = document.getElementById('partnerTbody');
+  if (!tb) return;
+  tb.innerHTML = rows.map(r => `<tr>
+    <td><div class="pname">${r.n}${r.src==='tableau'?'<span class="tableau-badge">T</span>':''}</div><div class="psub">${r.t}</div></td>
+    <td class="nr">${r.sp}</td><td class="nr">${r.cl}</td><td class="nr">${r.sg}</td>
+    <td class="nr">${r.cv}</td><td class="nr">${r.cp}</td><td class="nr">${r.pr}</td>
+    <td class="nr">${r.pa}</td><td class="nr" style="color:${r.mgc};">${r.mg}</td><td class="nr" style="color:${r.mgc};">${r.mgp}</td>
+    <td><span class="pill ${r.st}">${r.sl}</span></td>
+    <td style="text-align:center;"><div class="spark" style="justify-content:center;">${sparkH(r.sk,STCOL[r.st]||'var(--blue)')}</div></td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════════════════
+// TABLEAU DATA STORE (pre-parsed from file)
+// Source of truth for signups, paids, pay rate
+// ══════════════════════════════════════════
+const TABLEAU_DATA = {"wtd": {"Globalink Affiliates": {"signups": 0, "paids": 0, "pay_rate": 0}, "VelocityFin": {"signups": 8, "paids": 2, "pay_rate": 25.0}, "RateCompass": {"signups": 9, "paids": 3, "pay_rate": 33.3}, "Casulo Media": {"signups": 0, "paids": 0, "pay_rate": 0}, "Firstcard": {"signups": 0, "paids": 0, "pay_rate": 0}, "LeadBridge Inc": {"signups": 2, "paids": 0, "pay_rate": 0.0}, "Logan Media": {"signups": 0, "paids": 0, "pay_rate": 0}, "NorthStar Digital": {"signups": 3, "paids": 4, "pay_rate": 133.3}, "BladeFinance": {"signups": 1, "paids": 0, "pay_rate": 0.0}, "PulseReach Media": {"signups": 0, "paids": 0, "pay_rate": 0}, "Cognify Group": {"signups": 0, "paids": 0, "pay_rate": 0}, "Beacon Publishing": {"signups": 1, "paids": 0, "pay_rate": 0.0}, "PeakRank Media": {"signups": 0, "paids": 0, "pay_rate": 0}, "Apex Media Group": {"signups": 4, "paids": 1, "pay_rate": 25.0}, "SmartCents News": {"signups": 2, "paids": 2, "pay_rate": 100.0}, "Meridian Digital": {"signups": 1, "paids": 0, "pay_rate": 0.0}, "WalletIQ": {"signups": 34, "paids": 9, "pay_rate": 26.5}, "Streamline Partners": {"signups": 1, "paids": 0, "pay_rate": 0.0}, "Torchlight Media": {"signups": 0, "paids": 0, "pay_rate": 0}, "ClearScore Media": {"signups": 12, "paids": 6, "pay_rate": 50.0}, "Finwise Publishing": {"signups": 0, "paids": 0, "pay_rate": 0}, "FairFigure": {"signups": 0, "paids": 0, "pay_rate": 0}, "BrightRate": {"signups": 2, "paids": 0, "pay_rate": 0.0}, "HarborLeads": {"signups": 0, "paids": 0, "pay_rate": 0}, "Modaramo Media": {"signups": 0, "paids": 0, "pay_rate": 0}, "Motive Interactive": {"signups": 1, "paids": 0, "pay_rate": 0.0}, "Veritas Digital": {"signups": 1, "paids": 1, "pay_rate": 100.0}, "Prism Audiences": {"signups": 2, "paids": 0, "pay_rate": 0.0}, "TrustPillar": {"signups": 0, "paids": 0, "pay_rate": 0}}, "mtd": {"Globalink Affiliates": {"signups": 2, "paids": 0, "pay_rate": 0.0}, "VelocityFin": {"signups": 11, "paids": 3, "pay_rate": 27.3}, "RateCompass": {"signups": 185, "paids": 47, "pay_rate": 25.4}, "Casulo Media": {"signups": 0, "paids": 0, "pay_rate": 0}, "Firstcard": {"signups": 3, "paids": 1, "pay_rate": 33.3}, "LeadBridge Inc": {"signups": 14, "paids": 1, "pay_rate": 7.1}, "PulseReach Media": {"signups": 1, "paids": 2, "pay_rate": 200.0}, "NorthStar Digital": {"signups": 41, "paids": 16, "pay_rate": 39.0}, "BladeFinance": {"signups": 7, "paids": 1, "pay_rate": 14.3}, "Logan Media": {"signups": 1, "paids": 0, "pay_rate": 0.0}, "Cognify Group": {"signups": 1, "paids": 1, "pay_rate": 100.0}, "Beacon Publishing": {"signups": 40, "paids": 10, "pay_rate": 25.0}, "PeakRank Media": {"signups": 9, "paids": 4, "pay_rate": 44.4}, "Apex Media Group": {"signups": 30, "paids": 8, "pay_rate": 26.7}, "SmartCents News": {"signups": 31, "paids": 31, "pay_rate": 100.0}, "Meridian Digital": {"signups": 1, "paids": 1, "pay_rate": 100.0}, "WalletIQ": {"signups": 357, "paids": 136, "pay_rate": 38.1}, "Streamline Partners": {"signups": 12, "paids": 3, "pay_rate": 25.0}, "Torchlight Media": {"signups": 2, "paids": 2, "pay_rate": 100.0}, "ClearScore Media": {"signups": 122, "paids": 108, "pay_rate": 88.5}, "Finwise Publishing": {"signups": 19, "paids": 1, "pay_rate": 5.3}, "MaxBounty": {"signups": 1, "paids": 2, "pay_rate": 200.0}, "FairFigure": {"signups": 1, "paids": 0, "pay_rate": 0.0}, "BrightRate": {"signups": 14, "paids": 2, "pay_rate": 14.3}, "HarborLeads": {"signups": 1, "paids": 0, "pay_rate": 0.0}, "Modaramo Media": {"signups": 0, "paids": 0, "pay_rate": 0}, "Veritas Digital": {"signups": 5, "paids": 4, "pay_rate": 80.0}, "Motive Interactive": {"signups": 1, "paids": 0, "pay_rate": 0.0}, "Prism Audiences": {"signups": 3, "paids": 1, "pay_rate": 33.3}, "TrustPillar": {"signups": 11, "paids": 2, "pay_rate": 18.2}}, "ytd": {"Globalink Affiliates": {"signups": 3, "paids": 1, "pay_rate": 33.3}, "VelocityFin": {"signups": 3, "paids": 1, "pay_rate": 33.3}, "RateCompass": {"signups": 589, "paids": 105, "pay_rate": 17.8}, "Casulo Media": {"signups": 5, "paids": 1, "pay_rate": 20.0}, "Firstcard": {"signups": 15, "paids": 4, "pay_rate": 26.7}, "LeadBridge Inc": {"signups": 55, "paids": 13, "pay_rate": 23.6}, "PulseReach Media": {"signups": 6, "paids": 6, "pay_rate": 100.0}, "NorthStar Digital": {"signups": 151, "paids": 30, "pay_rate": 19.9}, "BladeFinance": {"signups": 19, "paids": 6, "pay_rate": 31.6}, "Logan Media": {"signups": 1, "paids": 0, "pay_rate": 0.0}, "Cognify Group": {"signups": 7, "paids": 4, "pay_rate": 57.1}, "Beacon Publishing": {"signups": 3, "paids": 1, "pay_rate": 33.3}, "PeakRank Media": {"signups": 20, "paids": 10, "pay_rate": 50.0}, "Apex Media Group": {"signups": 89, "paids": 60, "pay_rate": 67.4}, "SYNERGY INTERACTIVE LLC": {"signups": 3, "paids": 3, "pay_rate": 100.0}, "SmartCents News": {"signups": 101, "paids": 70, "pay_rate": 69.3}, "Meridian Digital": {"signups": 1, "paids": 1, "pay_rate": 100.0}, "WalletIQ": {"signups": 1206, "paids": 423, "pay_rate": 35.1}, "Streamline Partners": {"signups": 13, "paids": 1, "pay_rate": 7.7}, "Torchlight Media": {"signups": 11, "paids": 4, "pay_rate": 36.4}, "GoodRX, Inc.": {"signups": 1, "paids": 1, "pay_rate": 100.0}, "ClearScore Media": {"signups": 485, "paids": 347, "pay_rate": 71.5}, "Finwise Publishing": {"signups": 35, "paids": 4, "pay_rate": 11.4}, "Popular Marketing LLC": {"signups": 1, "paids": 2, "pay_rate": 200.0}, "Addshoppers": {"signups": 1, "paids": 1, "pay_rate": 100.0}, "MaxBounty": {"signups": 7, "paids": 3, "pay_rate": 42.9}, "FairFigure": {"signups": 5, "paids": 1, "pay_rate": 20.0}, "BrightRate": {"signups": 45, "paids": 5, "pay_rate": 11.1}, "HarborLeads": {"signups": 2, "paids": 1, "pay_rate": 50.0}, "Modaramo Media": {"signups": 0, "paids": 0, "pay_rate": 0}, "Veritas Digital": {"signups": 24, "paids": 17, "pay_rate": 70.8}, "Motive Interactive": {"signups": 1, "paids": 0, "pay_rate": 0.0}, "Trip Holding B.V. dba VIP Response B.V.": {"signups": 1, "paids": 0, "pay_rate": 0.0}, "Prism Audiences": {"signups": 3, "paids": 1, "pay_rate": 33.3}, "TrustPillar": {"signups": 19, "paids": 5, "pay_rate": 26.3}}};
+
+// EVERFLOW_DATA store (populated when EF CSV is uploaded)
+// ── Pre-aggregated Everflow data (from Flex Report 25-26.csv, Jan 2026–Mar 21 2026)
+// Keys: sp=spend(payout), cl=unique_clicks, rv=revenue, mg=margin
+// Updated: Mar 22 2026. Re-upload Everflow CSV to refresh.
+
+// ── Post-process TABLEAU_DATA: roll up sub-campaigns to EF-canonical names ──
+// WalletIQ in Tableau is split into two campaigns; EF tracks it as one
+(function() {
+  function rollup(p) {
+    const t = TABLEAU_DATA[p];
+    if (!t) return;
+    // Combine WalletIQ sub-campaigns into one row
+    const csKeys = Object.keys(t).filter(k => k.startsWith('WalletIQ'));
+    if (csKeys.length > 1 || (csKeys.length === 1 && csKeys[0] !== 'WalletIQ')) {
+      const totSg = csKeys.reduce((s, k) => s + t[k].signups, 0);
+      const totPa = csKeys.reduce((s, k) => s + t[k].paids, 0);
+      t['WalletIQ'] = { signups: totSg, paids: totPa, pay_rate: totSg > 0 ? Math.round(totPa / totSg * 1000) / 10 : 0 };
+      csKeys.forEach(k => { if (k !== 'WalletIQ') delete t[k]; });
+    }
+    // ClearScore Media (EF) = Consumers Advocate Group (Tableau)
+    if (t['Consumers Advocate Group - Ad Practitioners, LLC'] && !t['ClearScore Media']) {
+      t['ClearScore Media'] = t['Consumers Advocate Group - Ad Practitioners, LLC'];
+      delete t['Consumers Advocate Group - Ad Practitioners, LLC'];
+    }
+    // Normalize LeadBridge Inc casing to match EF
+    if (t['LeadBridge Inc']) {
+      if (!t['LeadBridge Inc']) t['LeadBridge Inc'] = t['LeadBridge Inc'];
+      delete t['LeadBridge Inc'];
+    }
+  }
+  ['wtd', 'mtd', 'ytd'].forEach(rollup);
+})();
+
+// Pre-aggregated from Flex_Report_-_25_26.csv (Jan–Mar 21 2026)
+// Periods: mtd=Mar 1-21, q1=Jan 1-Mar 21, annual=Jan 1-Mar 21
+// Refresh: upload new Everflow CSV via Import button
+const EVERFLOW_SEED = {"wtd": {"Globalink Affiliates": {"sp": 0.0, "cl": 3, "rv": 0, "mg": 0}, "VelocityFin": {"sp": 605.0, "cl": 242, "rv": 1200, "mg": 0}, "RateCompass": {"sp": 1098.0, "cl": 549, "rv": 822, "mg": 0}, "Casulo Media": {"sp": 0.0, "cl": 19, "rv": 0, "mg": 0}, "Firstcard": {"sp": 0.0, "cl": 1, "rv": 0, "mg": 0}, "LeadBridge Inc": {"sp": 46.0, "cl": 23, "rv": 0, "mg": 0}, "Logan Media": {"sp": 0.0, "cl": 15, "rv": 0, "mg": 0}, "NorthStar Digital": {"sp": 600.0, "cl": 108, "rv": 1932, "mg": 0}, "BladeFinance": {"sp": 0.0, "cl": 14, "rv": 0, "mg": 0}, "PulseReach Media": {"sp": 0.0, "cl": 2, "rv": 0, "mg": 0}, "Cognify Group": {"sp": 0.0, "cl": 11, "rv": 0, "mg": 0}, "Beacon Publishing": {"sp": 73.5, "cl": 45, "rv": 0, "mg": 0}, "PeakRank Media": {"sp": 0.0, "cl": 2, "rv": 0, "mg": 0}, "Apex Media Group": {"sp": 480.0, "cl": 195, "rv": 918, "mg": 0}, "Meridian Digital": {"sp": 126.0, "cl": 63, "rv": 0, "mg": 0}, "WalletIQ": {"sp": 6370.0, "cl": 1683, "rv": 5148, "mg": 0}, "Streamline Partners": {"sp": 0.0, "cl": 25, "rv": 0, "mg": 0}, "Torchlight Media": {"sp": 0.0, "cl": 7, "rv": 0, "mg": 0}, "ClearScore Media": {"sp": 4155.0, "cl": 188, "rv": 4344, "mg": 0}, "Finwise Publishing": {"sp": 0.0, "cl": 9, "rv": 0, "mg": 0}, "FairFigure": {"sp": 0.0, "cl": 1, "rv": 0, "mg": 0}, "BrightRate": {"sp": 600.0, "cl": 40, "rv": 0, "mg": 0}, "HarborLeads": {"sp": 0.0, "cl": 7, "rv": 0, "mg": 0}, "Modaramo Media": {"sp": 0.0, "cl": 3, "rv": 0, "mg": 0}, "Motive Interactive": {"sp": 450.0, "cl": 12, "rv": 0, "mg": 0}, "Veritas Digital": {"sp": 200.0, "cl": 5, "rv": 600, "mg": 0}, "Prism Audiences": {"sp": 210.0, "cl": 105, "rv": 0, "mg": 0}, "TrustPillar": {"sp": 0.0, "cl": 6, "rv": 0, "mg": 0}}, "mtd": {"Globalink Affiliates": {"sp": 360.0, "cl": 351, "rv": 0, "mg": 0}, "VelocityFin": {"sp": 1296.0, "cl": 553, "rv": 1800, "mg": 0}, "RateCompass": {"sp": 11784.0, "cl": 5892, "rv": 12878, "mg": 0}, "Casulo Media": {"sp": 0.0, "cl": 19, "rv": 0, "mg": 0}, "Firstcard": {"sp": 450.0, "cl": 143, "rv": 600, "mg": 0}, "LeadBridge Inc": {"sp": 594.0, "cl": 297, "rv": 600, "mg": 0}, "PulseReach Media": {"sp": 200.0, "cl": 40, "rv": 1200, "mg": 0}, "NorthStar Digital": {"sp": 6600.0, "cl": 1667, "rv": 7728, "mg": 0}, "BladeFinance": {"sp": 500.0, "cl": 205, "rv": 600, "mg": 0}, "Logan Media": {"sp": 0.0, "cl": 21, "rv": 0, "mg": 0}, "Cognify Group": {"sp": 0.0, "cl": 12, "rv": 600, "mg": 0}, "Beacon Publishing": {"sp": 2749.0, "cl": 2238, "rv": 6000, "mg": 0}, "PeakRank Media": {"sp": 1300.0, "cl": 66, "rv": 2400, "mg": 0}, "Apex Media Group": {"sp": 7512.9, "cl": 2072, "rv": 7344, "mg": 0}, "Meridian Digital": {"sp": 368.0, "cl": 144, "rv": 600, "mg": 0}, "WalletIQ": {"sp": 75950.0, "cl": 25606, "rv": 77792, "mg": 0}, "Streamline Partners": {"sp": 340.0, "cl": 1389, "rv": 1800, "mg": 0}, "Torchlight Media": {"sp": 0.0, "cl": 9, "rv": 1200, "mg": 0}, "ClearScore Media": {"sp": 43665.0, "cl": 2724, "rv": 78192, "mg": 0}, "Finwise Publishing": {"sp": 4185.0, "cl": 259, "rv": 600, "mg": 0}, "FairFigure": {"sp": 150.0, "cl": 10, "rv": 0, "mg": 0}, "BrightRate": {"sp": 2400.0, "cl": 646, "rv": 1200, "mg": 0}, "HarborLeads": {"sp": 150.0, "cl": 85, "rv": 0, "mg": 0}, "Modaramo Media": {"sp": 0.0, "cl": 3, "rv": 0, "mg": 0}, "Veritas Digital": {"sp": 400.0, "cl": 65, "rv": 2400, "mg": 0}, "Motive Interactive": {"sp": 450.0, "cl": 12, "rv": 0, "mg": 0}, "Prism Audiences": {"sp": 1060.0, "cl": 536, "rv": 600, "mg": 0}, "TrustPillar": {"sp": 1650.0, "cl": 103, "rv": 1200, "mg": 0}}, "ytd": {"Globalink Affiliates": {"sp": 540.0, "cl": 982, "rv": 600, "mg": 0}, "VelocityFin": {"sp": 1443.5, "cl": 612, "rv": 600, "mg": 0}, "RateCompass": {"sp": 36112.0, "cl": 18056, "rv": 28770, "mg": 0}, "Casulo Media": {"sp": 0.0, "cl": 297, "rv": 600, "mg": 0}, "Firstcard": {"sp": 1650.0, "cl": 468, "rv": 2400, "mg": 0}, "LeadBridge Inc": {"sp": 2720.0, "cl": 1362, "rv": 7800, "mg": 0}, "PulseReach Media": {"sp": 1000.0, "cl": 720, "rv": 3600, "mg": 0}, "NorthStar Digital": {"sp": 23400.0, "cl": 6262, "rv": 14490, "mg": 0}, "BladeFinance": {"sp": 955.0, "cl": 772, "rv": 3600, "mg": 0}, "Logan Media": {"sp": 0.0, "cl": 27, "rv": 0, "mg": 0}, "Cognify Group": {"sp": 950.0, "cl": 235, "rv": 2400, "mg": 0}, "Beacon Publishing": {"sp": 6447.0, "cl": 3513, "rv": 600, "mg": 0}, "PeakRank Media": {"sp": 2925.0, "cl": 267, "rv": 6000, "mg": 0}, "Apex Media Group": {"sp": 19193.8, "cl": 6756, "rv": 55080, "mg": 0}, "Meridian Digital": {"sp": 414.0, "cl": 201, "rv": 600, "mg": 0}, "WalletIQ": {"sp": 245490.0, "cl": 99768, "rv": 241956, "mg": 0}, "Streamline Partners": {"sp": 780.0, "cl": 2624, "rv": 600, "mg": 0}, "Torchlight Media": {"sp": 2800.0, "cl": 214, "rv": 2400, "mg": 0}, "ClearScore Media": {"sp": 162830.0, "cl": 8981, "rv": 251228, "mg": 0}, "Finwise Publishing": {"sp": 6810.0, "cl": 1713, "rv": 2400, "mg": 0}, "FairFigure": {"sp": 750.0, "cl": 41, "rv": 600, "mg": 0}, "BrightRate": {"sp": 8600.0, "cl": 1748, "rv": 3000, "mg": 0}, "HarborLeads": {"sp": 300.0, "cl": 239, "rv": 600, "mg": 0}, "Modaramo Media": {"sp": 0.0, "cl": 3, "rv": 0, "mg": 0}, "Veritas Digital": {"sp": 4125.0, "cl": 258, "rv": 10200, "mg": 0}, "Motive Interactive": {"sp": 450.0, "cl": 12, "rv": 0, "mg": 0}, "Prism Audiences": {"sp": 1202.0, "cl": 607, "rv": 600, "mg": 0}, "TrustPillar": {"sp": 2700.0, "cl": 264, "rv": 3000, "mg": 0}}};
+let EVERFLOW_DATA = JSON.parse(JSON.stringify(EVERFLOW_SEED)); // keys: wtd, mtd, ytd (annual is now ytd = 2026 YTD)
+
+// ── Build merged partner table from Tableau (source of truth) + Everflow (spend/clicks) ──
+function buildMergedPartners(p) {
+  const tab = TABLEAU_DATA[p] || {};
+  const ef  = EVERFLOW_DATA[p]  || {};
+
+
+  // ── Name normalization: maps EF names → canonical display name ──
+  // Also used to match EF names to Tableau entries
+  // All partner names are already canonical fake names — identity map
+  const EF_TO_CANONICAL = {};
+
+  // Normalize a raw EF name to its canonical form
+  function normEF(name) { return EF_TO_CANONICAL[name] || name; }
+
+  // Build EF lookup keyed by canonical name
+  const efByCanon = {};
+  for (const [rawName, v] of Object.entries(ef)) {
+    efByCanon[normEF(rawName)] = v;
+  }
+
+  // Only include EF partners that have actual clicks — skip zero-traffic noise
+  const efActiveNames = new Set(
+    Object.entries(efByCanon).filter(([,v]) => (v.cl || v.clicks || 0) > 0).map(([k]) => k)
+  );
+  // Combine: all Tableau partners + EF partners with clicks
+  const allNames = new Set([...Object.keys(tab), ...efActiveNames]);
+  const rows = [];
+
+  allNames.forEach(name => {
+    const t = tab[name];
+    const e = efByCanon[name];
+    const hasBoth = t && e;
+    const src = hasBoth ? 'merged' : (t ? 'tableau' : 'everflow');
+
+    const signups  = t ? t.signups : 0;
+    const paids    = t ? t.paids   : 0;
+    const pay_rate = t ? t.pay_rate : 0;
+    const spend    = e ? (e.sp || e.spend   || 0) : 0;
+    const clicks   = e ? (e.cl || e.clicks  || 0) : 0;
+
+    // ── LTR-based margin (Tableau paids × Paid LTR) - spend ──
+    // Paid LTR per partner (from Feb actuals); default $600 for all others
+    const PAID_LTR = {
+      'WalletIQ':    572,
+      'ClearScore Media':        724,
+      'RateCompass': 274,
+      'Apex Media Group':          918,
+      'NorthStar Digital':           483,
+      'SmartCents News':  705,
+    };
+    const ltr      = PAID_LTR[name] || 600;
+    const revenue  = paids * ltr;
+    const margin   = revenue - spend;
+    const marginPct = spend > 0 ? (margin / spend * 100) : 0;
+
+    // Derived
+    const cvr = clicks > 0 ? (signups / clicks * 100) : 0;
+    const cpa = signups > 0 && spend > 0 ? (spend / signups) : 0;
+    const mgColor = margin > 0 ? 'var(--green-text)' : margin < 0 ? 'var(--red-text)' : 'var(--text-tertiary)';
+    const statusLbl = marginPct >= 20 ? 'Strong' : marginPct >= 0 ? 'Positive' : marginPct >= -20 ? 'Watch' : 'At risk';
+    const status    = marginPct >= 20 ? 'pg'     : marginPct >= 0 ? 'pb'       : marginPct >= -20 ? 'pgy'   : 'pr';
+
+    rows.push({
+      n:   name,
+      t:   src === 'merged' ? 'Merged · EF + Tableau' : src === 'tableau' ? 'Tableau only' : 'Everflow only',
+      sp:  spend > 0 ? '$' + Math.round(spend).toLocaleString() : '—',
+      cl:  clicks > 0 ? clicks.toLocaleString() : '—',
+      sg:  signups > 0 ? signups.toLocaleString() : '—',
+      cv:  cvr > 0 ? cvr.toFixed(2) + '%' : '—',
+      cp:  cpa > 0 ? '$' + Math.round(cpa).toLocaleString() : '—',
+      pr:  pay_rate > 0 ? pay_rate.toFixed(1) + '%' : '—',
+      pa:  paids > 0 ? paids.toLocaleString() : '—',
+      mg:  paids > 0 && spend > 0 ? (margin >= 0 ? '+$' : '-$') + Math.abs(Math.round(margin)).toLocaleString() : '—',
+      mgp: paids > 0 && spend > 0 ? (marginPct >= 0 ? '+' : '') + Math.round(marginPct) + '%' : '—',
+      mgn: margin, // numeric for sorting
+      mgc: mgColor,
+      st:  status,
+      sl:  statusLbl,
+      sk:  [5,6,7,8,7],
+      src: src,
+      _signups: signups, _paids: paids, _spend: spend,
+    });
+  });
+
+  // Sort by signups desc by default
+  rows.sort((a, b) => b._signups - a._signups);
+  return rows;
+}
+
+// ── applyPeriodKPIs — refresh just the KPI strip without re-rendering everything ──
+function applyPeriodKPIs(p) {
+  const d = PD[p];
+  if (!d) return;
+  const kkeys = ['spend','signups','paids','cpa','pcpa','pr'];
+  const kmap  = [['spend','sd','sb','sbc'],['signups','sgd','sgb','sgbc'],['paids','pad','pab','pabc'],['cpa','cpad','cpab','cpabc'],['pcpa','pcpad','pcpab','pcpabc'],['pr','prd','prb','prbc']];
+  kkeys.forEach((k,i) => {
+    setEl('v-'+k, d[k]);
+    const parts = (d[kmap[i][1]] || 'up|').split('|');
+    const el = $('d-'+k); if (el) { el.className = 'kpi-delta ' + (parts[0]||'up'); el.textContent = parts[1]||''; }
+    const bar = $('b-'+k); if (bar) { bar.style.width = d[kmap[i][2]]; bar.style.background = d[kmap[i][3]]; }
+  });
+}
+
+// ── Update KPI strip totals from Tableau (source of truth for signups/paids/pay rate) ──
+function updateKPIsFromTableau(p) {
+  const tab = TABLEAU_DATA[p];
+  if (!tab) return;
+  let totalSig = 0, totalPaids = 0;
+  Object.values(tab).forEach(d => { totalSig += d.signups; totalPaids += d.paids; });
+  const payRate = totalSig > 0 ? (totalPaids / totalSig * 100).toFixed(1) : '—';
+
+  const sigEl = document.getElementById('v-signups');
+  const paidEl = document.getElementById('v-paids');
+  const prEl = document.getElementById('v-pr');
+  if (sigEl && totalSig > 0) sigEl.textContent = totalSig.toLocaleString();
+  try { updateRow2(p); } catch(e) {}
+  if (paidEl && totalPaids > 0) paidEl.textContent = totalPaids.toLocaleString();
+  if (prEl && payRate !== '—') prEl.textContent = payRate + '%';
+}
+
+// ── Also update TABLEAU_DATA when new Tableau file is imported ──
+// (called from import system's applyTableau function — extended below)
+function ingestTableauData(newData, p) {
+  if (!TABLEAU_DATA[p]) TABLEAU_DATA[p] = {};
+  Object.assign(TABLEAU_DATA[p], newData);
+  PARTNERS[p] = buildMergedPartners(p);
+  if (period === p) { renderPartnerTable(); updateKPIsFromTableau(p); }
+}
+
+function ingestEverflowData(newData, p) {
+  if (!EVERFLOW_DATA[p]) EVERFLOW_DATA[p] = {};
+  Object.assign(EVERFLOW_DATA[p], newData);
+  PARTNERS[p] = buildMergedPartners(p);
+  if (period === p) { renderPartnerTable(); }
+}
+</script>
+
+<!-- ── IMPORT MODAL ── -->
+<div id="importModal" class="modal-bg" style="display:none;" onclick="if(event.target===this)closeImport()">
+  <div class="modal">
+    <div class="modal-title">Import data</div>
+    <div class="modal-sub">Upload CSVs from Everflow, Tableau, or Jira — or type values manually. Upload multiple files one at a time; each applies on top of the last.</div>
+
+    <div class="import-tabs">
+      <div class="itab active" onclick="switchTab('csv')">📊 Upload CSV</div>
+      <div class="itab" onclick="switchTab('manual')">✏️ Manual entry</div>
+      <div class="itab" onclick="switchTab('history')">🕐 Import history</div>
+    </div>
+
+    <!-- ── CSV PANE ── -->
+    <div class="import-pane active" id="pane-csv">
+
+      <!-- Format guide -->
+      <div class="fmt-guide">
+        <div class="fmt-title">📋 How to export from each system</div>
+        <div class="fmt-row"><span class="fmt-src">Everflow</span><span class="fmt-how">Reports → <strong>Flex Report w/Margin</strong> → set date range → Export CSV. Single-day uploads merge into MTD; full MTD uploads replace it.</span></div>
+        <div class="fmt-row"><span class="fmt-src">Tableau</span><span class="fmt-how">Open <strong>Repair Only</strong> → MTD date range → <strong>Download → Excel (.xlsx)</strong>. Drop directly — auto-detected, no column mapping needed.</span></div>
+        <div class="fmt-note">💡 Tableau .xlsx auto-applies on drop. Everflow CSV shows an Apply button after loading.</div>
+      </div>
+
+      <!-- Source selector -->
+      <div class="field-group">
+        <div class="field-label">Source system <span style="color:var(--text-tertiary);text-transform:none;letter-spacing:0;font-weight:400;">— auto-detected, change if wrong</span></div>
+        <select class="fi" id="srcSystem">
+          <option value="everflow">Everflow — Partner report (CSV)</option>
+          <option value="tableau">Tableau — Repair Only export (.xlsx)</option>
+          <option value="jira">Jira — board export (CSV)</option>
+          <option value="finance">Finance — Budget CSV</option>
+          <option value="generic">Other — map columns manually</option>
+        </select>
+      </div>
+
+      <!-- Drop zone for drag-and-drop -->
+      <div id="dropZone" class="drop-zone"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="event.preventDefault();this.classList.remove('drag');handleFile(event.dataTransfer.files[0])">
+        <div class="dz-icon" id="dzIcon">📂</div>
+        <div class="dz-label" id="dzLabel">Drop file here</div>
+        <div class="dz-sub" id="dzSub">or use the button below · .csv (Everflow) or .xlsx (Tableau)</div>
+      </div>
+
+      <!-- Browse button — direct label, always works in every browser -->
+      <label for="fileInput" style="display:block;margin-top:10px;">
+        <span style="display:block;width:100%;padding:10px;text-align:center;background:var(--navy-light);border:1px solid var(--navy-border-mid);border-radius:var(--radius-sm);color:var(--text-primary);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;"
+              onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green-text)'"
+              onmouseout="this.style.borderColor='var(--navy-border-mid)';this.style.color='var(--text-primary)'">
+          📁 Browse files…
+        </span>
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.txt"
+               style="display:none;"
+               onchange="handleFile(this.files[0])">
+      </label>
+
+      <!-- Parse preview -->
+      <div id="parsePreview" style="display:none;" class="parse-preview"></div>
+
+      <!-- Column mapping (shown for Everflow CSV) -->
+      <div id="colMapSection" style="display:none;">
+        <div class="field-label" style="margin-top:14px;margin-bottom:6px;">
+          Column mapping <span style="color:var(--text-tertiary);text-transform:none;letter-spacing:0;font-weight:400;">— auto-detected. Fix any that look wrong.</span>
+        </div>
+        <div class="col-map" id="colMap"></div>
+      </div>
+
+      <!-- Status message -->
+      <div id="csvStatus"></div>
+
+      <!-- Apply button — shown after file loads -->
+      <div id="applyRow" style="display:none;margin:16px 0 0;">
+        <button class="btn-pri" id="importCsvBtn" onclick="applyCSVImport()"
+                style="width:100%;padding:13px;font-size:13px;font-weight:600;">
+          ✓ Apply to dashboard →
+        </button>
+      </div>
+
+      <div class="modal-footer" style="margin-top:12px;">
+        <button class="btn-sec" onclick="resetCSVPane()">Clear</button>
+        <button class="btn-sec" onclick="closeImport()">Cancel</button>
+      </div>
+    </div>
+
+        <!-- ── MANUAL PANE ── -->
+    <div class="import-pane" id="pane-manual">
+      <div class="field-label" style="margin-bottom:8px;">Period to update</div>
+      <div class="field-row" style="margin-bottom:16px;">
+        <select class="fi" id="manPeriod">
+          <option value="mtd" selected>MTD (current month)</option>
+          <option value="ytd">YTD (Jan 1 – today)</option>
+          <option value="ytd">YTD (Jan 1 – today)</option>
+        </select>
+        <input class="fi" id="manDate" type="text" placeholder="As-of date e.g. Mar 21, 2026">
+      </div>
+
+      <div class="manual-grid">
+        <div class="manual-group">
+          <div class="manual-group-lbl">Actuals — from Everflow</div>
+          <div class="field-label">Spend</div><input class="fi" id="m-spend" placeholder="e.g. $197,412" style="margin-bottom:8px;">
+          <div class="field-label">Signups</div><input class="fi" id="m-signups" placeholder="e.g. 741" style="margin-bottom:8px;">
+          <div class="field-label">New Customers</div><input class="fi" id="m-paids" placeholder="e.g. 418" style="margin-bottom:8px;">
+          <div class="field-label">Signup CPA</div><input class="fi" id="m-cpa" placeholder="e.g. $199" style="margin-bottom:8px;">
+          <div class="field-label">New Customer CPA</div><input class="fi" id="m-pcpa" placeholder="e.g. $472" style="margin-bottom:8px;">
+          <div class="field-label">Customer CVR</div><input class="fi" id="m-pr" placeholder="e.g. 37.1%">
+        </div>
+        <div class="manual-group">
+          <div class="manual-group-lbl">Targets — from Finance</div>
+          <div class="field-label">Spend target</div><input class="fi" id="m-tspend" placeholder="e.g. $600,000" style="margin-bottom:8px;">
+          <div class="field-label">Signup target</div><input class="fi" id="m-tsig" placeholder="e.g. 3,320" style="margin-bottom:8px;">
+          <div class="field-label">Signup CPA target</div><input class="fi" id="m-tcpa" placeholder="e.g. $175" style="margin-bottom:8px;">
+          <div class="field-label">New Customer CPA target</div><input class="fi" id="m-tpcpa" placeholder="e.g. $480" style="margin-bottom:8px;">
+          <div class="manual-group-lbl" style="margin-top:10px;">Repair split — from Tableau</div>
+          <div class="field-label">Repair signups</div><input class="fi" id="m-rep" placeholder="e.g. 321" style="margin-bottom:8px;">
+          <div class="field-label">Non-repair signups</div><input class="fi" id="m-nonrep" placeholder="e.g. 420">
+        </div>
+      </div>
+
+      <hr class="section-divider">
+      <div class="field-label" style="margin-bottom:8px;">Alert chips (topbar)</div>
+      <div class="field-row three">
+        <div><div class="field-label">Kill candidate</div><input class="fi" id="m-kill" placeholder="Partner name or blank"></div>
+        <div><div class="field-label">Compliance flags</div><input class="fi" id="m-comp" type="number" placeholder="e.g. 3"></div>
+        <div><div class="field-label">Top-3 concentration</div><input class="fi" id="m-conc" placeholder="e.g. 76%"></div>
+      </div>
+
+      <div id="manualStatus"></div>
+      <div class="modal-footer">
+        <button class="btn-sec" onclick="closeImport()">Cancel</button>
+        <button class="btn-pri" onclick="applyManual()">Apply to dashboard →</button>
+      </div>
+    </div>
+
+    <!-- ── HISTORY PANE ── -->
+    <div class="import-pane" id="pane-history">
+      <div id="historyList"></div>
+      <div class="modal-footer">
+        <button class="btn-sec" onclick="clearHistory()" style="color:var(--red-text);border-color:rgba(240,82,82,.3);">Clear history</button>
+        <button class="btn-pri" onclick="closeImport()">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// IMPORT SYSTEM — robust rewrite
+// ═══════════════════════════════════════════════
+
+const IMPORT_KEY = 'affiliateHub_v2_imports';
+let parsedCSVData = null;
+let importHistory = [];
+try { importHistory = JSON.parse(localStorage.getItem(IMPORT_KEY) || '[]'); } catch(e) {}
+
+// ── Modal open/close ──
+function openImport() {
+  document.getElementById('importModal').style.display = 'flex';
+  try { renderHistory(); } catch(e) { console.warn('History unavailable:', e.message); }
+  // Reset dropzone to fresh state
+  try {
+    document.getElementById('dzIcon').textContent  = '📂';
+    document.getElementById('dzLabel').textContent = 'Drop CSV or XLSX file here, or click to browse';
+    document.getElementById('dzSub').textContent   = 'Accepts .csv (Everflow) or .xlsx (Tableau) — no conversion needed';
+    document.getElementById('parsePreview').style.display = 'none';
+    document.getElementById('colMapSection').style.display = 'none';
+  } catch(e) {}
+  parsedCSVData = null;
+}
+function closeImport() {
+  document.getElementById('importModal').style.display = 'none';
+}
+function switchTab(t) {
+  ['csv','manual','history'].forEach((id, i) => {
+    document.querySelectorAll('.itab')[i].classList.toggle('active', id === t);
+    document.getElementById('pane-'+id).classList.toggle('active', id === t);
+  });
+}
+function resetCSVPane() {
+  parsedCSVData = null;
+  document.getElementById('parsePreview').style.display = 'none';
+  document.getElementById('colMapSection').style.display = 'none';
+  document.getElementById('applyRow').style.display = 'none';
+  document.getElementById('csvStatus').innerHTML = '';
+  document.getElementById('dzIcon').textContent  = '📂';
+  document.getElementById('dzLabel').textContent = 'Click here to browse, or drop a file';
+  document.getElementById('dzSub').textContent   = 'Accepts .csv (Everflow) or .xlsx (Tableau)';
+  try { document.getElementById('fileInput').value = ''; } catch(e) {}
+}
+
+// ── File handling ──
+function handleFile(file) {
+  if (!file) return;
+  const isXLSX = file.name.match(/\.xlsx$/i);
+  const isCSV  = file.name.match(/\.(csv|txt)$/i);
+  if (!isXLSX && !isCSV) {
+    showCSVStatus('err', '⚠ Please upload a .csv or .xlsx file.');
+    return;
+  }
+  // Auto-detect source: CSV = Everflow, XLSX = Tableau (confirmed by header detection)
+  const srcEl = document.getElementById('srcSystem');
+  if (isCSV && srcEl.value === 'tableau') srcEl.value = 'everflow';
+  if (isXLSX && srcEl.value === 'everflow') srcEl.value = 'tableau';
+  const reader = new FileReader();
+  if (isXLSX) {
+    reader.onload = e => parseXLSX(e.target.result, file.name);
+    reader.onerror = () => showCSVStatus('err', '⚠ Could not read file.');
+    reader.readAsArrayBuffer(file);
+  } else {
+    reader.onload = e => parseCSV(e.target.result, file.name);
+    reader.onerror = () => showCSVStatus('err', '⚠ Could not read file. Try again.');
+    reader.readAsText(file);
+  }
+}
+
+// ── XLSX parser — detects Tableau crosstab or flat EF sheet ──
+function parseXLSX(arrayBuffer, filename) {
+  if (typeof XLSX === 'undefined') {
+    showCSVStatus('err', '⚠ XLSX library not loaded. Try refreshing the page.');
+    return;
+  }
+  const wb = XLSX.read(arrayBuffer, { type: 'array' });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
+
+  // Detect Tableau wide crosstab: row 0 has 'Users - Repair' at col 5
+  const row0 = raw[0] || [];
+  const isTableauCrosstab = row0.some(v => v && String(v).includes('Users - Repair'));
+
+  if (isTableauCrosstab) {
+    parseTableauCrosstab(raw, filename);
+  } else {
+    // Treat as flat table — convert to CSV-style and feed existing pipeline
+    const headers = (raw[0] || []).map(h => String(h || ''));
+    const rows = raw.slice(1).filter(r => r.some(c => c !== null && c !== ''))
+      .map(r => r.map(c => c === null ? '' : String(c)));
+    parsedCSVData = { headers, rows, filename };
+    showFileLoaded(filename, rows.length, headers.length);
+    buildColumnMap(headers);
+    document.getElementById('importCsvBtn').style.display = 'inline-block';
+  document.getElementById('applyRow').style.display = 'block';
+    document.getElementById('csvStatus').innerHTML = '';
+  }
+}
+
+// ── Parse Tableau wide crosstab directly ──
+function parseTableauCrosstab(raw, filename) {
+  const row0 = raw[0] || [];
+  const row1 = raw[1] || [];
+
+  // Find metric block start columns
+  const usersStart = row0.findIndex(v => v && String(v).includes('Users - Repair'));
+  const paidsStart = row0.findIndex(v => v && String(v).includes('Paids - Repair'));
+
+  if (usersStart < 0) {
+    showCSVStatus('err', '⚠ Could not find "Users - Repair" column. Make sure this is the Repair Only export from Tableau.');
+    return;
+  }
+
+  // Date headers sit between usersStart and paidsStart (or end of row)
+  const dateHeaders = row1.slice(usersStart, paidsStart > 0 ? paidsStart : undefined);
+  const nDates = dateHeaders.length;
+
+  // ── Dynamic WTD window: Monday–Sunday of current week ──
+  const now = new Date();
+  const daysToMon = now.getDay() === 0 ? 6 : now.getDay() - 1;
+  const monDate = new Date(now); monDate.setDate(now.getDate() - daysToMon);
+  const sunDate = new Date(monDate); sunDate.setDate(monDate.getDate() + 6);
+  // Build set of WTD date strings matching Tableau format e.g. "March 16, 2026"
+  const wtdDates = new Set();
+  for (let d = new Date(monDate); d <= sunDate; d.setDate(d.getDate()+1)) {
+    const mo = d.toLocaleString('en-US',{month:'long'}); // "March"
+    wtdDates.add(`${mo} ${d.getDate()}, ${d.getFullYear()}`);
+  }
+
+  // ── Detect which periods this file covers ──
+  const allDateStrs = dateHeaders.filter(Boolean).map(String);
+  const hasJan = allDateStrs.some(s => s.startsWith('January'));
+  const hasFeb = allDateStrs.some(s => s.startsWith('February'));
+  const hasMar = allDateStrs.some(s => s.startsWith('March'));
+  // If file only has March dates, only update MTD + WTD, preserve YTD
+  const isMTDOnly = hasMar && !hasJan && !hasFeb;
+
+  function dateInPeriod(d, p) {
+    if (!d) return false;
+    const s = String(d);
+    if (p === 'ytd') return s.includes('2026');
+    if (p === 'mtd') return s.includes('March') && s.includes('2026');
+    if (p === 'wtd') return wtdDates.has(s.trim());
+    return false;
+  }
+
+  function cleanName(n) {
+    if (!n) return null;
+    let s = String(n).trim();
+    if (s === 'Total') return null;
+    for (const pfx of ['Everflow: ','Everflow- ']) {
+      if (s.startsWith(pfx)) s = s.slice(pfx.length);
+    }
+    return s;
+  }
+
+  // ── Aggregate by period ──
+  const results = { wtd: {}, mtd: {}, ytd: {} };
+  const periodsToProcess = isMTDOnly ? ['wtd','mtd'] : ['wtd','mtd','ytd'];
+
+  for (const p of periodsToProcess) {
+    const dIdxs = dateHeaders.map((d,i) => dateInPeriod(d,p) ? i : -1).filter(i => i >= 0);
+    for (const row of raw.slice(2)) {
+      const name = cleanName(row[4] || row[3]);
+      if (!name) continue;
+      const sg = dIdxs.reduce((s,i) => s + (Number(row[usersStart + i]) || 0), 0);
+      const pa = paidsStart > 0 ? dIdxs.reduce((s,i) => s + (Number(row[paidsStart + i]) || 0), 0) : 0;
+      if (sg === 0 && pa === 0) continue;
+      if (!results[p][name]) results[p][name] = { signups: 0, paids: 0 };
+      results[p][name].signups += Math.round(sg);
+      results[p][name].paids   += Math.round(pa);
+    }
+    for (const d of Object.values(results[p])) {
+      d.pay_rate = d.signups > 0 ? Math.round(d.paids / d.signups * 1000) / 10 : 0;
+    }
+  }
+
+  // ── Apply name normalizations ──
+  function normalizeTableauPeriod(t) {
+    // Merge WalletIQ sub-campaigns
+    const csKeys = Object.keys(t).filter(k => k.startsWith('WalletIQ'));
+    if (csKeys.length > 0 && !(csKeys.length === 1 && csKeys[0] === 'WalletIQ')) {
+      const sg = csKeys.reduce((s,k) => s + t[k].signups, 0);
+      const pa = csKeys.reduce((s,k) => s + t[k].paids, 0);
+      t['WalletIQ'] = { signups: sg, paids: pa, pay_rate: sg>0 ? Math.round(pa/sg*1000)/10 : 0 };
+      csKeys.forEach(k => { if (k !== 'WalletIQ') delete t[k]; });
+    }
+    // Consumers Advocate → ClearScore Media
+    if (t['Consumers Advocate Group - Ad Practitioners, LLC']) {
+      const existing = t['ClearScore Media'] || { signups: 0, paids: 0 };
+      const cag = t['Consumers Advocate Group - Ad Practitioners, LLC'];
+      const sg = existing.signups + cag.signups;
+      const pa = existing.paids + cag.paids;
+      t['ClearScore Media'] = { signups: sg, paids: pa, pay_rate: sg>0 ? Math.round(pa/sg*1000)/10 : 0 };
+      delete t['Consumers Advocate Group - Ad Practitioners, LLC'];
+    }
+  }
+
+  // ── Merge into TABLEAU_DATA ──
+  for (const p of periodsToProcess) {
+    if (!TABLEAU_DATA[p]) TABLEAU_DATA[p] = {};
+    // For MTD-only files, replace MTD/WTD entirely (don't add on top of stale data)
+    if (isMTDOnly) {
+      TABLEAU_DATA[p] = results[p];
+    } else {
+      Object.assign(TABLEAU_DATA[p], results[p]);
+    }
+    normalizeTableauPeriod(TABLEAU_DATA[p]);
+    PARTNERS[p] = buildMergedPartners(p);
+  }
+
+  // Render
+  if (typeof period !== 'undefined') {
+    renderPartnerTable();
+    updateKPIsFromTableau(period);
+  }
+
+  // Summary message
+  const mtdT = Object.values(results.mtd).reduce((s,d) => ({sg:s.sg+d.signups,pa:s.pa+d.paids}), {sg:0,pa:0});
+  const wtdT = Object.values(results.wtd).reduce((s,d) => ({sg:s.sg+d.signups,pa:s.pa+d.paids}), {sg:0,pa:0});
+  const scope = isMTDOnly ? 'MTD + WTD updated · YTD preserved' : 'WTD + MTD + YTD updated';
+
+  showFileLoaded(filename, Object.keys(results.mtd).length + ' partners', nDates + ' dates');
+  showCSVStatus('ok',
+    `✓ Tableau loaded (${scope})<br>` +
+    `MTD: ${mtdT.sg.toLocaleString()} signups / ${mtdT.pa.toLocaleString()} paids · ` +
+    `WTD: ${wtdT.sg.toLocaleString()} signups / ${wtdT.pa.toLocaleString()} paids`
+  );
+  updateFreshChip(today());
+  logImport('tableau', `${filename}: ${Object.keys(results.mtd).length} partners · MTD ${mtdT.sg} signups · ${scope}`);
+  // keep button visible for next file
+}
+
+  // Find where each metric block starts
+  const usersStart  = row0.findIndex(v => v && String(v).includes('Users - Repair'));
+  const paidsStart  = row0.findIndex(v => v && String(v).includes('Paids - Repair'));
+  const prStart     = row0.findIndex(v => v && String(v).includes('Pay Rate'));
+
+  if (usersStart < 0) { showCSVStatus('err', '⚠ Could not find "Users - Repair" column in this file. Is this the right Tableau export?'); return; }
+
+  const dateHeaders = row1.slice(usersStart, paidsStart > 0 ? paidsStart : undefined);
+
+  function dateInPeriod(d, p) {
+    if (!d) return false;
+    const s = String(d);
+    const mo = s.split(' ')[0];
+    if (p === 'ytd') return s.includes('2026');  // Jan–Mar YTD
+    if (p === 'mtd') return mo === 'March' && s.includes('2026');
+    if (p === 'wtd') return mo === 'March' && s.includes('2026') && ['March 16,','March 17,','March 18,','March 19,','March 20,','March 21,'].some(d => s.startsWith(d));
+    return false;
+  }
+
+  function cleanName(n) {
+    if (!n) return null;
+    let s = String(n).trim();
+    for (const pfx of ['Everflow: ','Everflow- ']) {
+      if (s.startsWith(pfx)) s = s.slice(pfx.length);
+    }
+    return s === 'Total' ? null : s;
+  }
+
+  const results = { wtd: {}, mtd: {}, ytd: {} };
+
+  for (const p of ['wtd', 'mtd', 'ytd']) {
+    const dIdxs = dateHeaders.map((d,i) => dateInPeriod(d,p) ? i : -1).filter(i => i >= 0);
+
+    for (const row of raw.slice(2)) {
+      const name = cleanName(row[4] || row[3]);
+      if (!name) continue;
+      const users = dIdxs.reduce((s,i) => s + (Number(row[usersStart + i]) || 0), 0);
+      const paids = paidsStart > 0 ? dIdxs.reduce((s,i) => s + (Number(row[paidsStart + i]) || 0), 0) : 0;
+      if (users === 0 && paids === 0) continue;
+      if (!results[p][name]) results[p][name] = { signups: 0, paids: 0 };
+      results[p][name].signups += Math.round(users);
+      results[p][name].paids   += Math.round(paids);
+    }
+
+    for (const [n, d] of Object.entries(results[p])) {
+      d.pay_rate = d.signups > 0 ? Math.round(d.paids / d.signups * 1000) / 10 : 0;
+    }
+  }
+
+  // Merge into TABLEAU_DATA and rebuild partners
+  for (const p of ['wtd', 'mtd', 'ytd']) {
+    if (!TABLEAU_DATA[p]) TABLEAU_DATA[p] = {};
+    Object.assign(TABLEAU_DATA[p], results[p]);
+    PARTNERS[p] = buildMergedPartners(p);
+  }
+  // Re-run rollup normalizations on freshly imported data
+  ['wtd','mtd','ytd'].forEach(p => {
+    const t = TABLEAU_DATA[p]; if (!t) return;
+    const csKeys = Object.keys(t).filter(k => k.startsWith('WalletIQ'));
+    if (csKeys.length > 1 || (csKeys.length===1 && csKeys[0]!=='WalletIQ')) {
+      const sg=csKeys.reduce((s,k)=>s+t[k].signups,0), pa=csKeys.reduce((s,k)=>s+t[k].paids,0);
+      t['WalletIQ']={signups:sg,paids:pa,pay_rate:sg>0?Math.round(pa/sg*1000)/10:0};
+      csKeys.forEach(k=>{if(k!=='WalletIQ')delete t[k];});
+    }
+    if (t['Consumers Advocate Group - Ad Practitioners, LLC']&&!t['ClearScore Media']) { t['ClearScore Media']=t['Consumers Advocate Group - Ad Practitioners, LLC']; delete t['Consumers Advocate Group - Ad Practitioners, LLC']; }
+    if (t['LeadBridge Inc'] && !t['LeadBridge Inc']) { t['LeadBridge Inc'] = t['LeadBridge Inc']; delete t['LeadBridge Inc']; }
+    else if (t['LeadBridge Inc']) { delete t['LeadBridge Inc']; } // LeadBridge Inc already exists, just remove the dupe
+    PARTNERS[p] = buildMergedPartners(p);
+  });
+
+function showFileLoaded(filename, rows, cols) {
+  document.getElementById('dzIcon').textContent = '✅';
+  document.getElementById('dzLabel').textContent = filename;
+  document.getElementById('dzSub').textContent = `${rows} data rows · ${cols} columns detected`;
+  const preview = document.getElementById('parsePreview');
+  preview.style.display = 'block';
+}
+
+function parseCSV(text, filename) {
+  // Normalize line endings, split rows
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(l => l.trim());
+  if (lines.length < 2) {
+    showCSVStatus('err', '⚠ File appears empty or has only a header row. Make sure you exported data rows.');
+    return;
+  }
+
+  const headers = splitCSVRow(lines[0]);
+  const rows = lines.slice(1).map(splitCSVRow).filter(r => r.some(c => c.trim()));
+
+  if (headers.length < 2) {
+    showCSVStatus('err', '⚠ Could not detect columns. Make sure the file uses comma-separated format.');
+    return;
+  }
+
+  parsedCSVData = { headers, rows, filename };
+
+  showFileLoaded(filename, rows.length, headers.length);
+
+  // Show preview
+  const preview = document.getElementById('parsePreview');
+  preview.style.display = 'block';
+  const previewRows = rows.slice(0, 3).map(r =>
+    r.slice(0, 5).map(c => c.length > 18 ? c.slice(0,16)+'…' : c).join('  |  ')
+  ).join('\n');
+  preview.innerHTML =
+    `<code style="color:var(--green-text)">✓ ${rows.length} rows, ${headers.length} columns</code><br>` +
+    `<code style="color:var(--text-tertiary)">Headers: ${headers.slice(0,6).join(' · ')}${headers.length>6?' · …':''}</code><br><br>` +
+    `<code style="color:var(--text-secondary);font-size:10px;white-space:pre;">${previewRows}</code>`;
+
+  // Auto-map columns and show mapping UI
+  try { buildColumnMap(headers); } catch(e) { console.warn('col map err', e); }
+  document.getElementById('applyRow').style.display = 'block';
+  document.getElementById('importCsvBtn').style.display = 'inline-block';
+  document.getElementById('csvStatus').innerHTML = '';
+}
+
+function splitCSVRow(row) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < row.length; i++) {
+    if (row[i] === '"') { inQ = !inQ; }
+    else if (row[i] === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
+    else { cur += row[i]; }
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+// ── Column mapping ──
+// Maps our internal field names to likely header variations per source
+const FIELD_ALIASES = {
+  partner:  ['partner','publisher','affiliate','affiliate_name','affiliate name','offer name','advertiser','partner name','pub name','network affiliate name','name','entity name'],
+  spend:    ['spend','cost','payout','total payout','total cost','gross revenue','total spend','media cost','partner payout','total_payout'],
+  clicks:   ['clicks','click','visits','total clicks','gross clicks','unique_clicks','unique clicks','total_clicks'],
+  signups:  ['conversions','cv','signups','leads','users','repair users','total cv','total conversions','users-repair','users repair','total_conversions'],
+  cvr:      ['cvr','conversion rate','conv rate','cr','cvr %'],
+  cpa:      ['cpa','cost per acquisition','cost per conversion','signup cpa','avg cpa'],
+  payrate:  ['pay rate','payrate','paid rate','approval rate','pay rate %','paids/signups'],
+  paids:    ['paids','paid','paid count','approved','paying users','paids-repair','paids repair'],
+  revenue:  ['revenue','media revenue','total revenue','gross revenue','advertiser revenue'],
+  margin:   ['margin','profit','net','margin $','net margin','gross margin'],
+  status:   ['status','state','stage'],
+  summary:  ['summary','title','issue','ticket'],
+  issuetype:['issue type','type','ticket type','kind'],
+};
+
+function bestMatch(headers, aliases) {
+  const lower = headers.map(h => h.toLowerCase().trim());
+  for (const alias of aliases) {
+    const i = lower.findIndex(h => h === alias || h.includes(alias));
+    if (i >= 0) return headers[i];
+  }
+  return '';
+}
+
+function buildColumnMap(headers) {
+  const src = document.getElementById('srcSystem').value;
+
+  // Which fields are relevant per source
+  const fieldSets = {
+    everflow: ['partner','spend','clicks','signups','cvr','cpa','payrate','paids','revenue','margin'],
+    tableau:  ['partner','signups','paids','payrate'],
+    jira:     ['summary','status','issuetype'],
+    finance:  ['spend','signups','paids','cpa'],
+    generic:  ['partner','spend','clicks','signups','cvr','cpa','payrate','paids','margin'],
+  };
+  const fields = fieldSets[src] || fieldSets.generic;
+
+  const mapEl = document.getElementById('colMap');
+  mapEl.innerHTML = fields.map(field => {
+    const matched = bestMatch(headers, FIELD_ALIASES[field] || [field]);
+    return `<div class="col-map-row">
+      <span class="col-map-from">${field}</span>
+      <span class="arrow">←</span>
+      <select class="fi-sm" id="map-${field}">
+        <option value="">(skip this field)</option>
+        ${headers.map(h => `<option value="${h}" ${h === matched ? 'selected' : ''}>${h}</option>`).join('')}
+      </select>
+      ${matched ? `<span style="font-size:10px;color:var(--green-text);">✓ auto</span>` : `<span style="font-size:10px;color:var(--amber-text);">⚠ not found</span>`}
+    </div>`;
+  }).join('');
+
+  document.getElementById('colMapSection').style.display = 'block';
+}
+
+function getMapped(field) {
+  const el = document.getElementById('map-' + field);
+  return el ? el.value : '';
+}
+
+function getColVal(row, field) {
+  const header = getMapped(field);
+  if (!header) return '';
+  const i = parsedCSVData.headers.indexOf(header);
+  return i >= 0 ? (row[i] || '').replace(/"/g, '').trim() : '';
+}
+
+// ── Apply CSV ──
+function applyCSVImport() {
+  if (!parsedCSVData) {
+    showCSVStatus('err', '⚠ No file loaded — drop a CSV file first.');
+    return;
+  }
+
+  const src = document.getElementById('srcSystem').value;
+
+  try {
+    if (src === 'everflow' || src === 'generic') applyEverflow();
+    else if (src === 'tableau') applyTableau();
+    else if (src === 'jira') applyJira();
+    else if (src === 'finance') applyFinance();
+  } catch(err) {
+    showCSVStatus('err', '⚠ Something went wrong applying the data: ' + err.message);
+    console.error(err);
+  }
+}
+
+function applyEverflow() {
+  const validRows = parsedCSVData.rows.filter(r => r.some(c => c.trim()));
+  if (validRows.length === 0) { showCSVStatus('err', '⚠ No data rows found. Check column mapping.'); return; }
+  if (!getMapped('partner') && !getMapped('spend')) {
+    showCSVStatus('err', '⚠ Map at least "partner" and "spend" columns above.');
+    return;
+  }
+
+  // ── Partner name normalization (EF name → canonical display name) ──
+  const EF_NORM = {
+    'WalletIQ':'WalletIQ','RateCompass':'RateCompass',
+    'Apex Media Group Media':'Apex Media Group','Finwise Publishing LLC':'Finwise Publishing',
+    'BrightRate':'BrightRate','TrustPillar':'TrustPillar',
+    'ClearScore Media':'ClearScore Media',
+    'BladeFinance':'BladeFinance','Best Company (SkyRocket)':'Best Company SkyRocket',
+    'Veritas Digital.':'Veritas Digital','Meridian Digital - Internet Brands':'Meridian Digital',
+    'Globalwide Media Limited':'Globalwide- Affiliate - online',
+    'MomentScience - AdsPostX':'Moment Science 50% Off Discount',
+    'Approved Apartment Locators':'Approved Apartment',
+    'Streamline Partners Group':'Streamline Partners',
+    'LeadBridge Inc':'LeadBridge Inc',
+    'RX Marketing':'RX Marketing - Affiliate - Email/CPA',
+    'VIP Response B.V.':'Trip Holding B.V. dba VIP Response B.V.',
+  };
+
+  // ── Work out Monday–Sunday boundaries for current week ──
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon … 6=Sat
+  const daysToMon = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // days back to Monday
+  const monDate = new Date(now); monDate.setDate(now.getDate() - daysToMon);
+  const sunDate = new Date(monDate); sunDate.setDate(monDate.getDate() + 6);
+  const toStr = d => d.toISOString().slice(0, 10); // YYYY-MM-DD
+  const wtdMin = toStr(monDate);
+  const wtdMax = toStr(sunDate);
+
+  // ── Detect date column (Flex Report uses 'date') ──
+  const dateColHeader = parsedCSVData.headers.find(h =>
+    ['date','day','report_date'].includes(h.toLowerCase().trim())
+  );
+  const dateColIdx = dateColHeader ? parsedCSVData.headers.indexOf(dateColHeader) : -1;
+  const hasDateCol = dateColIdx >= 0;
+
+  // ── Aggregate rows into MTD and WTD buckets ──
+  // One row per partner/date/offer-URL in Flex Report → must sum
+  const mtdData = {}, wtdData = {};
+
+  validRows.forEach(row => {
+    const rawName = (getColVal(row, 'partner') || '(unnamed)').trim();
+    const name    = EF_NORM[rawName] || rawName;
+    const spend   = parseNum(getColVal(row, 'spend'));
+    const clicks  = parseNum(getColVal(row, 'clicks'));
+    const revenue = parseNum(getColVal(row, 'revenue'));
+    const margin  = parseNum(getColVal(row, 'margin'));
+
+    // Always add to MTD bucket
+    if (mtdData[name]) {
+      mtdData[name].sp += spend; mtdData[name].cl += clicks;
+      mtdData[name].rv += revenue; mtdData[name].mg += margin;
+    } else {
+      mtdData[name] = { sp: spend, cl: clicks, rv: revenue, mg: margin };
+    }
+
+    // Add to WTD bucket only if row date falls in Mon–Sun window
+    if (hasDateCol) {
+      const rowDate = (row[dateColIdx] || '').trim();
+      if (rowDate >= wtdMin && rowDate <= wtdMax) {
+        if (wtdData[name]) {
+          wtdData[name].sp += spend; wtdData[name].cl += clicks;
+          wtdData[name].rv += revenue; wtdData[name].mg += margin;
+        } else {
+          wtdData[name] = { sp: spend, cl: clicks, rv: revenue, mg: margin };
+        }
+      }
+    }
+  });
+
+  // Filter out rows with no spend and very few clicks (noise)
+  const clean = d => Object.fromEntries(Object.entries(d).filter(([,v]) => (v.cl||0) > 0));
+  const mtdClean = clean(mtdData);
+  const wtdClean = clean(wtdData);
+
+  // ── Detect if this is a single-day file or multi-day ──
+  // Single-day: MERGE on top of existing MTD (so yesterday's data adds to prior days)
+  // Multi-day (MTD export): REPLACE MTD entirely with fresh data
+  const allDates = validRows.map(r => (r[dateColIdx]||'').trim()).filter(Boolean);
+  const uniqueDates = [...new Set(allDates)];
+  const isSingleDay = hasDateCol && uniqueDates.length === 1;
+
+  if (isSingleDay) {
+    // Merge: add new day's data on top of existing MTD
+    if (!EVERFLOW_DATA.mtd) EVERFLOW_DATA.mtd = {};
+    Object.entries(mtdClean).forEach(([name, v]) => {
+      if (EVERFLOW_DATA.mtd[name]) {
+        EVERFLOW_DATA.mtd[name].sp += v.sp;
+        EVERFLOW_DATA.mtd[name].cl += v.cl;
+        EVERFLOW_DATA.mtd[name].rv += v.rv;
+        EVERFLOW_DATA.mtd[name].mg += v.mg;
+      } else {
+        EVERFLOW_DATA.mtd[name] = { ...v };
+      }
+    });
+  } else {
+    // Full MTD export: replace entirely
+    EVERFLOW_DATA.mtd = mtdClean;
+  }
+  // WTD: always replace with what the file says (it's a short window)
+  EVERFLOW_DATA.wtd = Object.keys(wtdClean).length > 0 ? wtdClean : EVERFLOW_DATA.wtd;
+
+  // Rebuild partner tables for affected periods
+  PARTNERS.mtd = buildMergedPartners('mtd');
+  PARTNERS.wtd = buildMergedPartners('wtd');
+  // YTD: update MTD portion within YTD by merging MTD on top of existing YTD EF data
+  // (YTD seed is Jan–today; re-uploading MTD keeps prior months intact)
+  if (EVERFLOW_DATA.ytd) {
+    Object.assign(EVERFLOW_DATA.ytd, mtdClean); // overwrite current month partners only
+    PARTNERS.ytd = buildMergedPartners('ytd');
+  }
+
+  // Update KPI spend for current period
+  const mtdSpend = Object.values(mtdClean).reduce((s,d) => s + d.sp, 0);
+  const wtdSpend = Object.values(wtdClean).reduce((s,d) => s + d.sp, 0);
+  if (mtdSpend > 0 && PD.mtd) PD.mtd.spend = '$' + Math.round(mtdSpend).toLocaleString();
+  if (wtdSpend > 0 && PD.wtd) PD.wtd.spend = '$' + Math.round(wtdSpend).toLocaleString();
+
+  applyPeriodKPIs(period);
+  renderPartnerTable();
+  updateFreshChip(today());
+
+  const mtdCount = Object.keys(mtdClean).length;
+  const wtdCount = Object.keys(wtdClean).length;
+  const dateLabel = isSingleDay ? `${uniqueDates[0]} added to MTD` : `MTD replaced (${uniqueDates.length} days)`;
+  const weekLabel = `${wtdMin} – ${wtdMax}`;
+
+  logImport('everflow',
+    `MTD: ${mtdCount} partners $${Math.round(mtdSpend).toLocaleString()} | WTD (${weekLabel}): ${wtdCount} partners $${Math.round(wtdSpend).toLocaleString()} | YTD prior months preserved`
+  );
+  showCSVStatus('ok',
+    `✓ MTD updated — ${mtdCount} partners, $${Math.round(mtdSpend).toLocaleString()} spend<br>` +
+    `✓ WTD auto-split — ${wtdCount} partners, $${Math.round(wtdSpend).toLocaleString()} spend (${hasDateCol ? weekLabel : 'no date col detected'})<br>` +
+    `✓ YTD preserved — prior months untouched`
+  );
+  document.getElementById('importCsvBtn').textContent = '✓ Applied!';
+  setTimeout(() => closeImport(), 1800);
+}
+
+function applyTableau() {
+  // Flat CSV Tableau export (not the wide XLSX — that is handled by parseTableauCrosstab)
+  if (!getMapped('partner') && !getMapped('signups')) {
+    showCSVStatus('err', '⚠ Map "partner" and "signups" columns above.'); return;
+  }
+  const p = period;
+  const tabData = {};
+  parsedCSVData.rows.filter(r => r.some(c => c.trim())).forEach(row => {
+    const name = getColVal(row, 'partner');
+    if (!name) return;
+    const sg = parseNum(getColVal(row, 'signups'));
+    const pa = parseNum(getColVal(row, 'paids'));
+    if (!tabData[name]) tabData[name] = { signups: 0, paids: 0 };
+    tabData[name].signups += Math.round(sg);
+    tabData[name].paids   += Math.round(pa);
+  });
+  for (const d of Object.values(tabData)) {
+    d.pay_rate = d.signups > 0 ? Math.round(d.paids / d.signups * 1000) / 10 : 0;
+  }
+  Object.assign(TABLEAU_DATA[p], tabData);
+  PARTNERS[p] = buildMergedPartners(p);
+  renderPartnerTable();
+  updateKPIsFromTableau(p);
+  updateFreshChip(today());
+  const tot = Object.values(tabData).reduce((s,d) => ({signups: s.signups+d.signups, paids: s.paids+d.paids}), {signups:0,paids:0});
+  logImport('tableau', 'CSV: ' + Object.keys(tabData).length + ' partners, ' + tot.signups + ' signups from ' + parsedCSVData.filename);
+  showCSVStatus('ok', '✓ Tableau CSV loaded — ' + Object.keys(tabData).length + ' partners, ' + tot.signups + ' signups / ' + tot.paids + ' paids. Merged with Everflow spend.');
+  document.getElementById('importCsvBtn').textContent = '✓ Applied!';
+  setTimeout(() => closeImport(), 1400);
+}
+
+
+function applyJira() {
+  if (!getMapped('summary') && !getMapped('status')) {
+    showCSVStatus('err', '⚠ Map at least the "summary" and "status" columns to import Jira tickets.');
+    return;
+  }
+  const tickets = parsedCSVData.rows.filter(r => r.some(c => c.trim())).map(row => ({
+    id:   '—',
+    title: getColVal(row, 'summary') || '(no title)',
+    status: getColVal(row, 'status') || '',
+    type:  getColVal(row, 'issuetype') || 'Task',
+  }));
+
+  // Inject into ticket panel in the DOM
+  const el = document.getElementById('jiraTicketList');
+  if (el) {
+    el.innerHTML = tickets.slice(0, 8).map(t => {
+      const dotColor = t.status.toLowerCase().includes('progress') ? 'amber' :
+                       t.status.toLowerCase().includes('done') ? 'green' :
+                       t.status.toLowerCase().includes('block') ? 'red' : 'blue';
+      return `<div class="ticket">
+        <div class="t-dot ${dotColor}"></div>
+        <div class="t-id">Jira</div>
+        <div class="t-body"><div class="t-title">${t.title}</div><div class="t-meta"><span class="pill pgy" style="font-size:9px;">${t.type}</span></div></div>
+        <div class="t-right"><div class="t-due">${t.status}</div></div>
+      </div>`;
+    }).join('');
+    // update badge
+    const badge = document.querySelector('.sb-item[data-page="jira"] .sb-badge');
+    if (badge) badge.textContent = tickets.length;
+  }
+
+  updateFreshChip(today());
+  logImport('jira', `${tickets.length} tickets from ${parsedCSVData.filename}`);
+  showCSVStatus('ok', `✓ ${tickets.length} Jira tickets imported. Dashboard refreshed.`);
+  setTimeout(() => closeImport(), 1200);
+}
+
+function applyFinance() {
+  // Finance CSV: look for rows where first column contains known labels
+  let found = {};
+  parsedCSVData.rows.forEach(row => {
+    const label = (row[0] || '').toLowerCase().trim();
+    const val   = (row[1] || row[2] || '').trim(); // target usually in col 1 or 2
+    if (label.includes('spend'))   found.ss = val;
+    if (label.includes('signup') && !label.includes('cpa')) found.si = val;
+    if (label.includes('paid') && !label.includes('cpa'))   found.pi = val;
+    if (label.includes('signup cpa') || label.includes('cpa') && label.includes('signup')) found.cpan = 'Target ≤' + val;
+  });
+
+  if (Object.keys(found).length === 0) {
+    showCSVStatus('err', '⚠ Could not find targets in this file. The CSV should have rows labeled "Spend", "Signups", "New Customers", "CPA" in the first column.');
+    return;
+  }
+
+  Object.assign(PD[period], found);
+  applyPeriod(period);
+  updateFreshChip(today());
+  logImport('finance', `Finance targets updated: ${Object.keys(found).join(', ')} from ${parsedCSVData.filename}`);
+  showCSVStatus('ok', `✓ Finance targets updated (${Object.keys(found).length} values). Dashboard refreshed.`);
+  setTimeout(() => closeImport(), 1200);
+}
+
+// ── Manual entry ──
+function applyManual() {
+  const p = document.getElementById('manPeriod').value;
+  const g = id => document.getElementById(id)?.value?.trim() || '';
+  const updates = {};
+
+  if (g('m-spend'))   updates.spend   = g('m-spend');
+  if (g('m-signups')) updates.signups = g('m-signups');
+  if (g('m-paids'))   updates.paids   = g('m-paids');
+  if (g('m-cpa'))     updates.cpa     = g('m-cpa');
+  if (g('m-pcpa'))    updates.pcpa    = g('m-pcpa');
+  if (g('m-pr'))      updates.pr      = g('m-pr');
+  if (g('m-rep'))     updates.rep     = g('m-rep');
+  if (g('m-nonrep'))  updates.nonrep  = g('m-nonrep');
+  if (g('m-tspend'))  updates.ss      = g('m-tspend');
+  if (g('m-tsig'))    updates.si      = g('m-tsig');
+  if (g('m-tcpa'))    updates.cpan    = 'Target ≤' + g('m-tcpa');
+  if (g('m-tpcpa'))   updates.pcpan   = 'Target ≤' + g('m-tpcpa');
+
+  if (Object.keys(updates).length === 0) {
+    document.getElementById('manualStatus').innerHTML = '<div class="status-msg warn">Nothing entered — fill in at least one field.</div>';
+    return;
+  }
+
+  Object.assign(PD[p], updates);
+  recomputeDeltas(p, updates);
+
+  if (period === p) applyPeriod(p);
+
+  // Update alert chips
+  if (g('m-kill')) {
+    const kc = document.getElementById('killChip');
+    if (kc) { kc.style.display = 'block'; kc.textContent = '⚠ ' + g('m-kill') + ' — kill decision'; }
+  }
+  if (g('m-comp')) {
+    const cc = document.getElementById('compChip');
+    if (cc) cc.textContent = g('m-comp') + ' compliance flags';
+  }
+
+  updateFreshChip(g('manDate') || today());
+  logImport('manual', Object.keys(updates).map(k => k + ': ' + updates[k]).join(', '));
+  document.getElementById('manualStatus').innerHTML =
+    `<div class="status-msg ok">✓ Dashboard updated with ${Object.keys(updates).length} value${Object.keys(updates).length > 1 ? 's' : ''}.</div>`;
+  setTimeout(() => closeImport(), 1000);
+}
+
+function recomputeDeltas(p, u) {
+  const d = PD[p];
+  if (u.spend) {
+    const a = parseNum(u.spend), t = parseNum(d.ss || '0');
+    if (t > 0) {
+      const pct = Math.round(a / t * 100);
+      d.sd  = (pct >= 98 ? 'up' : 'wa') + '|' + pct + '% to target (' + d.ss + ')';
+      d.sb  = Math.min(pct, 100) + '%';
+      d.sbc = pct >= 100 ? 'var(--green)' : 'var(--amber)';
+    }
+  }
+  if (u.signups) {
+    const a = parseNum(u.signups), t = parseNum(d.si || '0');
+    if (t > 0) {
+      const pct = Math.round(a / t * 100);
+      d.sgd  = (pct >= 98 ? 'up' : 'wa') + '|' + pct + '% to target (' + d.si + ')';
+      d.sgb  = Math.min(pct, 100) + '%';
+      d.sgbc = pct >= 100 ? 'var(--green)' : 'var(--amber)';
+    }
+  }
+  if (u.cpa) {
+    const target = parseNum((d.cpan || '').replace('Target ≤','') || '175');
+    const a = parseNum(u.cpa);
+    d.cpad = a > target
+      ? 'dn|↓ $' + (a - target).toFixed(0) + ' over target ($' + target + ')'
+      : 'up|↑ On target ($' + target + ')';
+    d.cpab  = a > target ? '100%' : '90%';
+    d.cpabc = a > target ? 'var(--red)' : 'var(--green)';
+    d.cpav  = u.cpa + ' · ' + (a > target ? '$' + (a-target).toFixed(0) + ' over' : 'on target');
+  }
+  if (u.paids) {
+    const a = parseNum(u.paids), t = parseNum(d.pi || d.si || '0') * 0.38;
+    if (t > 0) {
+      const pct = Math.round(a / t * 100);
+      d.pad  = (pct >= 95 ? 'up' : 'wa') + '|' + pct + '% to target';
+      d.pab  = Math.min(pct, 100) + '%';
+      d.pabc = pct >= 100 ? 'var(--green)' : 'var(--amber)';
+    }
+  }
+}
+
+// ── Formatting helpers ──
+function parseNum(s) {
+  const str = (s || '').toString().replace(/[$,%\s]/g, '');
+  const n = parseFloat(str.replace(/[^0-9.-]/g, ''));
+  if (isNaN(n)) return 0;
+  if (str.toUpperCase().includes('K')) return n * 1000;
+  if (str.toUpperCase().includes('M')) return n * 1000000;
+  return n;
+}
+function fmtDollar(s) {
+  const n = parseNum(s);
+  if (!s || n === 0) return s || '—';
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000)    return '$' + Math.round(n).toLocaleString();
+  return '$' + n.toFixed(0);
+}
+function fmtInt(s) {
+  const n = parseNum(s);
+  return (s && n > 0) ? Math.round(n).toLocaleString() : (s || '—');
+}
+function fmtPct(s) {
+  if (!s) return '—';
+  const n = parseFloat((s || '').toString().replace(/[^0-9.]/g, ''));
+  return isNaN(n) ? s : n.toFixed(2) + '%';
+}
+
+// ── Status helpers ──
+function showCSVStatus(type, msg) {
+  document.getElementById('csvStatus').innerHTML =
+    `<div class="status-msg ${type}">${msg}</div>`;
+}
+
+// ── Freshness chip ──
+function today() {
+  return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+function updateFreshChip(dt) {
+  const c = document.getElementById('freshChip');
+  if (c) { c.style.display = 'block'; c.textContent = 'Updated ' + dt; }
+}
+
+// ── Import history ──
+function logImport(source, summary) {
+  importHistory.unshift({ source, summary, ts: today() });
+  importHistory = importHistory.slice(0, 30);
+  try { localStorage.setItem(IMPORT_KEY, JSON.stringify(importHistory)); } catch(e) {}
+  renderHistory();
+}
+function renderHistory() {
+  const el = document.getElementById('historyList');
+  if (!el) return;
+  if (importHistory.length === 0) {
+    el.innerHTML = '<div style="color:var(--text-tertiary);font-size:12px;padding:24px 0;text-align:center;">No imports yet. Use the Upload CSV or Manual entry tabs to get started.</div>';
+    return;
+  }
+  const labels = { everflow: 'Everflow CSV', tableau: 'Tableau CSV', jira: 'Jira CSV', finance: 'Finance CSV', manual: 'Manual entry', generic: 'CSV import' };
+  el.innerHTML = importHistory.map(h =>
+    `<div class="history-item">
+      <div><div class="hi-source">${labels[h.source] || h.source}</div><div class="hi-meta">${(h.summary||'').slice(0,90)}</div></div>
+      <div class="hi-date">${h.ts}</div>
+    </div>`
+  ).join('');
+}
+function clearHistory() {
+  importHistory = [];
+  try { localStorage.removeItem(IMPORT_KEY); } catch(e) {}
+  renderHistory();
+}
+
+// ── Init ──
+window.addEventListener('DOMContentLoaded', () => {
+  if (importHistory.length > 0) updateFreshChip(importHistory[0].ts);
+  renderPaceAlert();
+  renderGapAnalysis();
+});
+
+// ══════════════════════════════════════════
+// PACE ALERT + GAP ANALYSIS
+// ══════════════════════════════════════════
+
+// Real March targets
+const MARCH_TARGETS = {
+  spend: 238000, signups: 1204, paids: 537, cpa: 198, pcpa: 443
+};
+
+// Days in month — dynamically computed
+function getDaysInfo() {
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  // Use yesterday as "data through" date since today's data isn't in yet
+  // This ensures daysLeft reflects remaining days after last data point
+  const dataThrough = now.getDate() - 1;  // data through yesterday
+  const daysPassed  = dataThrough > 0 ? dataThrough : 1;
+  const daysLeft    = daysInMonth - daysPassed;
+  return { daysInMonth, dayOfMonth: dataThrough, daysLeft, daysPassed };
+}
+
+function renderPaceAlert() {
+  const alert = document.getElementById('paceAlert');
+  const msg   = document.getElementById('paceMsg');
+  const right = document.getElementById('paceRight');
+  const icon  = document.getElementById('paceIcon');
+  const bar   = alert?.querySelector('.pace-bar');
+  if (!alert || period !== 'mtd') { if(alert) alert.style.display='none'; return; }
+
+  const d = getDaysInfo();
+  const tab = TABLEAU_DATA.mtd || {};
+  const totalSg = Object.values(tab).reduce((s,v) => s+v.signups, 0);
+  const totalPa = Object.values(tab).reduce((s,v) => s+v.paids, 0);
+  const ef  = EVERFLOW_DATA.mtd || {};
+  const totalSp = Object.values(ef).reduce((s,v) => s+(v.sp||0), 0);
+
+  const T = MARCH_TARGETS;
+  const sgGap  = T.signups - totalSg;
+  const paGap  = T.paids   - totalPa;
+  const sgRate = totalSg / d.daysPassed;  // actual signups/day so far
+  const paRate = totalPa / d.daysPassed;
+  const sgNeed = sgGap / d.daysLeft;      // signups/day needed to hit target
+  const paNeed = paGap / d.daysLeft;
+  const sgProj = Math.round(totalSg + sgRate * d.daysLeft);  // projection at current pace
+  const paProj = Math.round(totalPa + paRate * d.daysLeft);
+
+  // Status: are we on track?
+  const sgBehind = sgNeed > sgRate * 1.05;  // need >5% more than current rate
+  const paBehind = paNeed > paRate * 1.05;
+  const overallStatus = sgBehind ? (sgNeed > sgRate * 1.2 ? 'alert' : 'warn') : 'ok';
+
+  if (bar) { bar.className = 'pace-bar ' + overallStatus; }
+  icon.textContent = overallStatus === 'ok' ? '✅' : overallStatus === 'warn' ? '⚠️' : '🔴';
+
+  alert.style.display = 'block';
+
+  msg.innerHTML = `
+    <strong>${d.daysLeft} days left in March</strong> &nbsp;·&nbsp;
+    Signups: <strong>${Math.ceil(sgNeed)}/day needed</strong> <span class="dim">(running ${sgRate.toFixed(1)}/day · proj ${sgProj.toLocaleString()} at pace)</span>
+    &nbsp;&nbsp;
+    New Customers: <strong>${Math.ceil(paNeed)}/day needed</strong> <span class="dim">(running ${paRate.toFixed(1)}/day · proj ${paProj.toLocaleString()} at pace)</span>
+  `;
+
+  const sgPill = sgBehind ? `<span class="pace-pill amber">${sgGap} signup gap</span>` : `<span class="pace-pill green">Signups ✓</span>`;
+  const paPill = paBehind ? `<span class="pace-pill amber">${paGap} new customers gap</span>`  : `<span class="pace-pill green">New Customers ✓</span>`;
+  right.innerHTML = sgPill + paPill;
+}
+
+// Partner opportunity data (from Flex Report analysis)
+const PARTNER_OPPS = [
+  { name: 'Finwise Publishing',    type: 'ramp',    cvr: 1.9,  trend: '↑↑', note: 'Ramping fast — 4 CVs Jan → 11 Feb → 17 Mar. Increase payout to unlock more volume.' },
+  { name: 'Digital Brands',   type: 'cvr',     cvr: 8.0,  trend: '↑',  note: '8% CVR but only $3.9K spend Q1. High converter — room to push more traffic.' },
+  { name: 'Best Company',     type: 'cvr',     cvr: 7.6,  trend: '↑↑', note: '7.6% CVR, growing MoM (3→8→9 CVs). Low spend — strong scaling candidate.' },
+  { name: 'TrustPillar',  type: 'cvr',     cvr: 7.1,  trend: '↑↑', note: '7.1% CVR, accelerating in March (5→2→11 CVs). Push more volume here.' },
+  { name: 'Streamline Partners',   type: 'ramp',    cvr: 0.4,  trend: '↑↑', note: 'Just 1→2→8 CVs MoM — early ramp signal. Low CVR but growing quickly.' },
+  { name: 'MomentScience',    type: 'new',     cvr: 1.4,  trend: '↑↑', note: 'Launched March, 5 CVs already. New partner worth monitoring for LP optimization.' },
+  { name: 'VelocityFin', type: 'new',  cvr: 0.8,  trend: '↑↑', note: 'First activity in March (2 CVs). Just launched — track closely.' },
+  { name: 'Red Ventures',     type: 'revive',  cvr: 5.4,  trend: '↓',  note: '11 CVs Jan+Feb, zero in March. High CVR partner — worth a reactivation conversation.' },
+  { name: 'LeadBridge Inc',       type: 'scale',   cvr: 3.3,  trend: '→',  note: '44 Q1 CVs at 3.3% CVR, $2.6K spend. Relatively cheap — could push caps.' },
+];
+
+const TYPE_LABEL = { ramp:'🌱 Ramping', cvr:'⚡ High CVR', new:'🆕 New launch', revive:'🔄 Reactivate', scale:'📈 Scale up' };
+const TYPE_COLOR = { ramp:'var(--green-text)', cvr:'var(--blue-text)', new:'#a78bfa', revive:'var(--amber-text)', scale:'var(--green-text)' };
+
+function renderGapAnalysis() {
+  const panel   = document.getElementById('gapPanel');
+  const content = document.getElementById('gapContent');
+  if (!panel || !content) return;
+
+  // Only show on MTD
+  if (period !== 'mtd') { panel.style.display='none'; return; }
+  panel.style.display='block';
+
+  const d = getDaysInfo();
+  const tab = TABLEAU_DATA.mtd || {};
+  const totalSg = Object.values(tab).reduce((s,v) => s+v.signups, 0);
+  const sgGap  = Math.max(0, MARCH_TARGETS.signups - totalSg);
+  const sgRate = totalSg / d.daysPassed;
+  const sgProj = Math.round(totalSg + sgRate * d.daysLeft);
+  const projGap = MARCH_TARGETS.signups - sgProj;
+
+  content.innerHTML = `
+    <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start;">
+      <div>
+        <div class="sec-label" style="margin-bottom:10px;">Projection at current pace</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:14px;line-height:1.6;">
+          At <strong style="color:var(--text-primary)">${sgRate.toFixed(1)} signups/day</strong> you project 
+          <strong style="color:${sgProj>=MARCH_TARGETS.signups?'var(--green-text)':'var(--amber-text)'}">${sgProj.toLocaleString()}</strong> 
+          signups by month end — <strong style="color:var(--amber-text)">${Math.abs(projGap)} ${projGap>0?'short of':'over'} target</strong>.<br><br>
+          To close the gap: need <strong style="color:var(--text-primary)">${Math.ceil(sgGap/d.daysLeft)}/day</strong> vs 
+          current <strong style="color:var(--text-primary)">${sgRate.toFixed(1)}/day</strong> 
+          — a <strong style="color:var(--amber-text)">${Math.round((sgGap/d.daysLeft/sgRate-1)*100)}% step-up</strong> required.
+        </div>
+        <div class="sec-label" style="margin-bottom:8px;">Fastest levers in the next 10 days</div>
+        <div style="font-size:11px;color:var(--text-secondary);line-height:1.7;">
+          <strong style="color:var(--text-primary)">1. Push caps on top volume partners</strong> — WalletIQ and ClearScore Media drive ~55% of signups. If either has headroom, that moves the needle most.<br>
+          <strong style="color:var(--text-primary)">2. Reactivate Red Ventures</strong> — 11 CVs at 5.4% CVR in Jan+Feb, zero in March. A reactivation call could add 5–10 signups quickly.<br>
+          <strong style="color:var(--text-primary)">3. Scale high-CVR small partners</strong> — Digital Brands (8%), Best Company (7.6%), TrustPillar (7.1%) are all converting well but low volume.
+        </div>
+      </div>
+      <div>
+        <div class="sec-label" style="margin-bottom:10px;">Partner opportunities</div>
+        ${PARTNER_OPPS.map(p => `
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--navy-border);">
+            <div style="flex:1;">
+              <div style="font-size:11.5px;font-weight:500;color:var(--text-primary);">
+                ${p.name}
+                <span style="font-size:9px;font-weight:500;color:${TYPE_COLOR[p.type]};margin-left:6px;">${TYPE_LABEL[p.type]}</span>
+              </div>
+              <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px;line-height:1.4;">${p.note}</div>
+            </div>
+            <div style="flex-shrink:0;text-align:right;">
+              <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text-secondary);">${p.cvr}% CVR</div>
+              <div style="font-size:10px;color:${p.trend.includes('↑↑')?'var(--green-text)':p.trend==='↓'?'var(--red-text)':'var(--text-tertiary)'};">${p.trend} trend</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// Re-render pace alert and gap analysis when period changes
+const _origApply = applyPeriod;
+// Hook into period change to show/hide panels
+document.querySelectorAll('.pt-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    setTimeout(() => { renderPaceAlert(); renderGapAnalysis(); }, 50);
+  });
+});
+</script>
+</body>
+</html>
